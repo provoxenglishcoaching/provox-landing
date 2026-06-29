@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="288" height="288" viewBox="0 0 288 288">
+  <rect width="288" height="288" fill="#132861"/>
+  <circle cx="144" cy="108" r="56" fill="#2abfbf" opacity="0.3"/>
+  <circle cx="144" cy="108" r="44" fill="#2abfbf" opacity="0.5"/>
+  <path d="M 60 240 Q 60 180 144 180 Q 228 180 228 240" fill="#2abfbf" opacity="0.4"/>
+  <text x="144" y="116" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="42" fill="#ffffff">B</text>
+</svg>

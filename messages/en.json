@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "home": "Home",
+    "program": "Program",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "cta": "Free Consultation"
+  },
+  "hero": {
+    "line1": "Natural.",
+    "line2": "Confident.",
+    "line3": "English for adults.",
+    "subheading": "A premium 1-on-1 English coaching program for adults.",
+    "cta": "Book Your Free Consultation"
+  },
+  "whatIsProvox": {
+    "heading": "What is ProVox?",
+    "body": "ProVox is a premium, personalized 1-on-1 English coaching program built specifically for adults and professionals who want to communicate naturally and confidently.",
+    "consultation": "For a free consultation, contact Coach Brad",
+    "coachName": "Coach Brad",
+    "coachTitle": "Lead English Coach & Founder"
+  },
+  "whatWeOffer": {
+    "heading": "Our Courses",
+    "subheading": "Two programs. One goal — English that works for you.",
+    "courses": [
+      {
+        "name": "Communication Skills",
+        "price": "5,990,000₫",
+        "period": "/ month",
+        "commitmentNote": "Or enroll for 3 months for just 15,990,000₫",
+        "description": "Build the speaking and listening skills you need to communicate naturally and confidently in everyday English.",
+        "features": [
+          "Structured 1-on-1 coaching sessions",
+          "Improve speaking and listening skills",
+          "Each session is built specifically for your needs"
+        ],
+        "cta": "Get Started"
+      },
+      {
+        "name": "Professional Communication",
+        "price": "6,990,000₫",
+        "period": "/ month",
+        "commitmentNote": "Or enroll for 3 months for just 18,990,000₫",
+        "badge": "12 weeks. 24 sessions. Everything you need.",
+        "description": "A structured 12-week program built around the skills professionals need most — from communication etiquette to assertiveness.",
+        "features": [
+          "1-on-1 professional English coaching sessions",
+          "The full Vox: Professional Communication curriculum",
+          "Full access to ProVox audio coaching materials",
+          "Personalized feedback tailored to your job"
+        ],
+        "cta": "Get Started"
+      }
+    ],
+    "customHeading": "Need Something Different?",
+    "customBody": "ProVox also offers ongoing coaching and custom curriculum development for individuals with specific goals or industries. If you need a program built around your exact needs, get in touch and we'll put something together.",
+    "customCta": "Talk to Coach Brad"
+  },
+  "curriculum": {
+    "heading": "What You'll Learn",
+    "subheading": "The Vox: Professional Communication Curriculum",
+    "note": "Your coach will tailor each session to your workplace and industry.",
+    "skills": [
+      {
+        "title": "Communication Etiquette",
+        "description": "Master the professional norms of English business communication across email, meetings, and workplace interactions."
+      },
+      {
+        "title": "Clarity & Accuracy",
+        "description": "Speak and write with precision — eliminate ambiguity and build confidence in every professional message."
+      },
+      {
+        "title": "Participating in Discussions",
+        "description": "Learn to contribute confidently in meetings, conference calls, and group settings."
+      },
+      {
+        "title": "Professional Assertiveness",
+        "description": "Express your ideas, opinions, and boundaries clearly without losing professional rapport."
+      }
+    ]
+  },
+  "contact": {
+    "heading": "Start with a Free Consultation",
+    "subheading": "No commitment. Just a conversation about your goals.",
+    "zaloLabel": "Message on Zalo",
+    "kakaoLabel": "KakaoTalk: BradHerdt",
+    "emailHeading": "Or send a message",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "Your email",
+    "messagePlaceholder": "Tell us about your goals...",
+    "submit": "Send Message",
+    "successMessage": "Thank you! Coach Brad will be in touch within 24 hours.",
+    "errorMessage": "Something went wrong. Please try again or contact us directly on Zalo.",
+    "responseNote": "Coach Brad responds within 24 hours"
+  }
+}

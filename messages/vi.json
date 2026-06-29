@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "home": "Trang chủ",
+    "program": "Chương trình",
+    "pricing": "Học phí",
+    "contact": "Liên hệ",
+    "cta": "Tư vấn miễn phí"
+  },
+  "hero": {
+    "line1": "Tự nhiên.",
+    "line2": "Tự tin.",
+    "line3": "Tiếng Anh cho người lớn.",
+    "subheading": "Chương trình coaching tiếng Anh 1-on-1 cao cấp dành cho người lớn.",
+    "cta": "Đăng ký tư vấn miễn phí"
+  },
+  "whatIsProvox": {
+    "heading": "ProVox là gì?",
+    "body": "ProVox là chương trình coaching tiếng Anh 1-on-1 cao cấp, được thiết kế riêng cho người lớn và các chuyên gia muốn giao tiếp một cách tự nhiên và tự tin.",
+    "consultation": "Để được tư vấn miễn phí, hãy liên hệ Coach Brad",
+    "coachName": "Coach Brad",
+    "coachTitle": "Giáo viên tiếng Anh & Người sáng lập"
+  },
+  "whatWeOffer": {
+    "heading": "Các khóa học",
+    "subheading": "Hai chương trình. Một mục tiêu — tiếng Anh phù hợp với bạn.",
+    "courses": [
+      {
+        "name": "Kỹ năng giao tiếp",
+        "price": "5.990.000₫",
+        "period": "/ tháng",
+        "commitmentNote": "Hoặc đăng ký 3 tháng chỉ với 15.990.000₫",
+        "description": "Xây dựng kỹ năng nói và nghe để giao tiếp tiếng Anh hàng ngày một cách tự nhiên và tự tin.",
+        "features": [
+          "Các buổi coaching 1-on-1 có cấu trúc",
+          "Cải thiện kỹ năng nói và nghe",
+          "Mỗi buổi học được thiết kế riêng cho nhu cầu của bạn"
+        ],
+        "cta": "Bắt đầu ngay"
+      },
+      {
+        "name": "Giao tiếp chuyên nghiệp",
+        "price": "6.990.000₫",
+        "period": "/ tháng",
+        "commitmentNote": "Hoặc đăng ký 3 tháng chỉ với 18.990.000₫",
+        "badge": "12 tuần. 24 buổi. Tất cả những gì bạn cần.",
+        "description": "Chương trình 12 tuần có cấu trúc, tập trung vào những kỹ năng chuyên nghiệp quan trọng nhất — từ văn hóa giao tiếp đến sự tự tin chuyên nghiệp.",
+        "features": [
+          "Các buổi coaching tiếng Anh chuyên nghiệp 1-on-1",
+          "Toàn bộ chương trình Vox: Giao tiếp chuyên nghiệp",
+          "Toàn quyền truy cập tài liệu âm thanh của ProVox",
+          "Phản hồi cá nhân hóa phù hợp với công việc của bạn"
+        ],
+        "cta": "Bắt đầu ngay"
+      }
+    ],
+    "customHeading": "Bạn cần điều gì khác?",
+    "customBody": "ProVox cũng cung cấp coaching liên tục và phát triển chương trình học tùy chỉnh cho những cá nhân có mục tiêu hoặc ngành nghề cụ thể. Nếu bạn cần một chương trình được xây dựng theo đúng nhu cầu của mình, hãy liên hệ và chúng tôi sẽ cùng nhau tạo ra nó.",
+    "customCta": "Liên hệ Coach Brad"
+  },
+  "curriculum": {
+    "heading": "Bạn sẽ học gì",
+    "subheading": "Chương trình Vox: Giao tiếp chuyên nghiệp",
+    "note": "Giáo viên sẽ điều chỉnh từng buổi học phù hợp với môi trường làm việc và ngành nghề của bạn.",
+    "skills": [
+      {
+        "title": "Văn hóa giao tiếp",
+        "description": "Nắm vững các chuẩn mực giao tiếp tiếng Anh chuyên nghiệp qua email, cuộc họp và các tình huống làm việc."
+      },
+      {
+        "title": "Rõ ràng & Chính xác",
+        "description": "Nói và viết chính xác — loại bỏ sự mơ hồ và xây dựng sự tự tin trong từng thông điệp chuyên nghiệp."
+      },
+      {
+        "title": "Tham gia thảo luận",
+        "description": "Học cách đóng góp tự tin trong cuộc họp, cuộc gọi hội nghị và các nhóm làm việc."
+      },
+      {
+        "title": "Tự tin chuyên nghiệp",
+        "description": "Thể hiện ý tưởng, quan điểm và ranh giới của bạn một cách rõ ràng mà không ảnh hưởng đến mối quan hệ chuyên nghiệp."
+      }
+    ]
+  },
+  "contact": {
+    "heading": "Bắt đầu với buổi tư vấn miễn phí",
+    "subheading": "Không ràng buộc. Chỉ là cuộc trò chuyện về mục tiêu của bạn.",
+    "zaloLabel": "Nhắn tin qua Zalo",
+    "kakaoLabel": "KakaoTalk: BradHerdt",
+    "emailHeading": "Hoặc gửi tin nhắn",
+    "namePlaceholder": "Tên của bạn",
+    "emailPlaceholder": "Email của bạn",
+    "messagePlaceholder": "Hãy chia sẻ mục tiêu của bạn...",
+    "submit": "Gửi tin nhắn",
+    "successMessage": "Cảm ơn bạn! Coach Brad sẽ liên hệ trong vòng 24 giờ.",
+    "errorMessage": "Đã xảy ra lỗi. Vui lòng thử lại hoặc liên hệ trực tiếp qua Zalo.",
+    "responseNote": "Coach Brad phản hồi trong vòng 24 giờ"
+  }
+}
