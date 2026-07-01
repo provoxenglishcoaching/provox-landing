@@ -47,7 +47,7 @@ export async function generateMetadata({
       siteName: 'ProVox English Coaching',
       images: [
         {
-          url: '/og-image.png',
+          url: 'https://provoxcoach.com/og-image.png',
           width: 1536,
           height: 768,
           alt: 'ProVox — Professional English Coaching',
@@ -59,7 +59,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: titles[locale] ?? titles.en,
       description,
-      images: ['/og-image.png'],
+      images: ['https://provoxcoach.com/og-image.png'],
     },
   };
 }
