@@ -35,10 +35,32 @@ export async function generateMetadata({
     ko: 'ProVox — 비즈니스 영어 코칭',
     vi: 'ProVox — Luyện Tiếng Anh Chuyên Nghiệp',
   };
+  const description = 'A premium coaching program for adults who want to speak English with confidence.';
   return {
     metadataBase: new URL('https://provoxcoach.com'),
     title: titles[locale] ?? titles.en,
-    description: 'A premium 1-on-1 English coaching program for adults in Ho Chi Minh City.',
+    description,
+    openGraph: {
+      title: titles[locale] ?? titles.en,
+      description,
+      url: 'https://provoxcoach.com',
+      siteName: 'ProVox English Coaching',
+      images: [
+        {
+          url: '/og-image.png',
+          width: 1536,
+          height: 768,
+          alt: 'ProVox — Professional English Coaching',
+        },
+      ],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: titles[locale] ?? titles.en,
+      description,
+      images: ['/og-image.png'],
+    },
   };
 }
 
