@@ -1,3 +1,5 @@
+'use client';
+
 export default function StatBar() {
   const stats = [
     { value: '10 yrs', label: 'Professional experience' },
