@@ -36,30 +36,25 @@ export async function generateMetadata({
     vi: 'ProVox — Luyện Tiếng Anh Chuyên Nghiệp',
   };
   const description = 'A premium coaching program for adults who want to speak English with confidence.';
+  const ogImage = 'https://www.provoxcoach.com/og-image.png';
+
   return {
-    metadataBase: new URL('https://provoxcoach.com'),
+    metadataBase: new URL('https://www.provoxcoach.com'),
     title: titles[locale] ?? titles.en,
     description,
     openGraph: {
       title: titles[locale] ?? titles.en,
       description,
-      url: 'https://provoxcoach.com',
+      url: 'https://www.provoxcoach.com',
       siteName: 'ProVox English Coaching',
-      images: [
-        {
-          url: 'https://provoxcoach.com/og-image.png',
-          width: 1536,
-          height: 768,
-          alt: 'ProVox — Professional English Coaching',
-        },
-      ],
+      images: [{ url: ogImage, width: 1536, height: 768, alt: 'ProVox — Professional English Coaching' }],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
       title: titles[locale] ?? titles.en,
       description,
-      images: ['https://provoxcoach.com/og-image.png'],
+      images: [ogImage],
     },
   };
 }
@@ -77,6 +72,12 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={`${montserrat.variable} ${nunitoSans.variable}`}>
+      <head>
+        <meta property="og:image" content="https://www.provoxcoach.com/og-image.png" />
+        <meta property="og:image:width" content="1536" />
+        <meta property="og:image:height" content="768" />
+        <meta name="twitter:image" content="https://www.provoxcoach.com/og-image.png" />
+      </head>
       <body style={{ WebkitFontSmoothing: 'antialiased' } as React.CSSProperties}>
         <NextIntlClientProvider messages={messages}>
           <Navbar />
