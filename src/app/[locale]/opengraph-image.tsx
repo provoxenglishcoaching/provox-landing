@@ -22,205 +22,120 @@ export default async function Image() {
           overflow: 'hidden',
         }}
       >
-        {/* Teal glow top-left */}
-        <div
-          style={{
-            position: 'absolute',
-            top: -120,
-            left: -120,
-            width: 400,
-            height: 400,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(42,191,191,0.18) 0%, transparent 70%)',
-            display: 'flex',
-          }}
-        />
+        {/* Dot pattern top-right */}
+        <div style={{
+          position: 'absolute', top: 0, right: 0,
+          width: 320, height: 320, opacity: 0.08,
+          backgroundImage: 'radial-gradient(circle, #2abfbf 1.5px, transparent 1.5px)',
+          backgroundSize: '20px 20px',
+          display: 'flex',
+        }} />
 
-        {/* Teal glow bottom-right */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: -100,
-            right: 300,
-            width: 360,
-            height: 360,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(42,191,191,0.12) 0%, transparent 70%)',
-            display: 'flex',
-          }}
-        />
+        {/* Teal glow bottom-left */}
+        <div style={{
+          position: 'absolute', bottom: -80, left: -80,
+          width: 360, height: 360, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(42,191,191,0.15) 0%, transparent 70%)',
+          display: 'flex',
+        }} />
 
         {/* Left content */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            padding: '64px 56px',
-            flex: 1,
-          }}
-        >
-          {/* Waveform logo bars */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 28 }}>
+        <div style={{
+          display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', padding: '64px 60px', flex: 1,
+        }}>
+
+          {/* Wave icon */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 32 }}>
             {[
-              { h: 24, op: 0.45 },
-              { h: 36, op: 0.65 },
-              { h: 52, op: 1.0 },
-              { h: 36, op: 0.65 },
-              { h: 24, op: 0.45 },
+              { h: 18, op: 0.4 }, { h: 28, op: 0.6 }, { h: 42, op: 1.0 },
+              { h: 28, op: 0.6 }, { h: 18, op: 0.4 },
             ].map((bar, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 10,
-                  height: bar.h,
-                  borderRadius: 5,
-                  background: `rgba(42,191,191,${bar.op})`,
-                  display: 'flex',
-                }}
-              />
+              <div key={i} style={{
+                width: 9, height: bar.h, borderRadius: 5,
+                background: `rgba(42,191,191,${bar.op})`, display: 'flex',
+              }} />
             ))}
-            <span
-              style={{
-                marginLeft: 16,
-                fontSize: 13,
-                letterSpacing: '0.3em',
-                color: 'rgba(255,255,255,0.5)',
-                textTransform: 'uppercase',
-              }}
-            >
-              provoxcoach.com
-            </span>
           </div>
 
-          {/* Brand name */}
-          <div
-            style={{
-              fontSize: 86,
-              fontWeight: 700,
-              color: '#ffffff',
-              lineHeight: 1,
-              letterSpacing: '-2px',
-              display: 'flex',
-            }}
-          >
-            ProVox
+          {/* PRO VOX wordmark */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 0, lineHeight: 1, marginBottom: 8 }}>
+            <span style={{ fontSize: 88, fontWeight: 900, color: '#ffffff', letterSpacing: '-2px' }}>PRO</span>
+            <span style={{ fontSize: 88, fontWeight: 900, color: '#2abfbf', letterSpacing: '-2px' }}>VOX</span>
           </div>
 
           {/* Subtitle */}
-          <div
-            style={{
-              fontSize: 26,
-              color: '#2abfbf',
-              marginTop: 12,
-              fontWeight: 600,
-              letterSpacing: '0.02em',
-              display: 'flex',
-            }}
-          >
+          <div style={{
+            fontSize: 17, color: 'rgba(255,255,255,0.55)',
+            letterSpacing: '0.25em', textTransform: 'uppercase',
+            marginBottom: 40, display: 'flex',
+          }}>
             Professional English Coaching
           </div>
 
-          {/* Divider */}
-          <div
-            style={{
-              width: 56,
-              height: 3,
-              background: '#2abfbf',
-              borderRadius: 2,
-              marginTop: 28,
-              marginBottom: 28,
-              display: 'flex',
-            }}
-          />
+          {/* Tagline */}
+          <div style={{
+            fontSize: 38, fontWeight: 300, color: '#ffffff',
+            lineHeight: 1.5, letterSpacing: '-0.5px', display: 'flex',
+            flexDirection: 'column', gap: 0,
+          }}>
+            <span>Natural. Confident.</span>
+            <span>English for adults.</span>
+          </div>
 
-          {/* Key stats */}
-          <div style={{ display: 'flex', gap: 28, marginBottom: 20 }}>
-            {['1 Program', '12 Weeks', 'Business English'].map((item) => (
-              <div
-                key={item}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                }}
-              >
-                <div
-                  style={{
-                    width: 7,
-                    height: 7,
-                    borderRadius: '50%',
-                    background: '#2abfbf',
-                    display: 'flex',
-                  }}
-                />
-                <span style={{ fontSize: 22, color: '#ffffff', fontWeight: 600 }}>{item}</span>
+          {/* Divider + programs */}
+          <div style={{
+            width: 48, height: 2, background: '#2abfbf',
+            marginTop: 36, marginBottom: 24, display: 'flex',
+          }} />
+
+          <div style={{ display: 'flex', gap: 24 }}>
+            {['2 Programs', '1-on-1 & Groups', 'Ho Chi Minh City'].map((item) => (
+              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: '#2abfbf', display: 'flex',
+                }} />
+                <span style={{ fontSize: 19, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>{item}</span>
               </div>
             ))}
           </div>
 
-          {/* Audience */}
-          <div
-            style={{
-              fontSize: 19,
-              color: 'rgba(255,255,255,0.65)',
-              display: 'flex',
-            }}
-          >
-            Premium 1-on-1 for Korean &amp; Vietnamese Professionals
+          {/* Domain */}
+          <div style={{
+            marginTop: 28, fontSize: 15,
+            color: 'rgba(255,255,255,0.35)',
+            letterSpacing: '0.1em', display: 'flex',
+          }}>
+            provoxcoach.com
           </div>
         </div>
 
         {/* Right — Brad photo */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 340,
-            paddingRight: 60,
-            gap: 20,
-          }}
-        >
-          {/* Photo ring */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 228,
-              height: 228,
-              borderRadius: '50%',
-              background: 'rgba(42,191,191,0.2)',
-              padding: 6,
-            }}
-          >
+        <div style={{
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          width: 320, paddingRight: 56, gap: 18,
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 220, height: 220, borderRadius: '50%',
+            background: 'rgba(42,191,191,0.18)', padding: 5,
+          }}>
             <img
               src={bradSrc}
-              style={{
-                width: 216,
-                height: 216,
-                borderRadius: '50%',
-                objectFit: 'cover',
-              }}
+              style={{ width: 210, height: 210, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top' }}
             />
           </div>
 
-          {/* Name badge */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: 12,
-              padding: '10px 24px',
-            }}
-          >
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            background: 'rgba(255,255,255,0.07)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: 10, padding: '10px 22px',
+          }}>
             <span style={{ fontSize: 18, fontWeight: 700, color: '#ffffff' }}>Brad Herdt</span>
-            <span style={{ fontSize: 13, color: '#2abfbf', marginTop: 2 }}>Lead Coach</span>
+            <span style={{ fontSize: 13, color: '#2abfbf', marginTop: 3 }}>ProVox English Coach</span>
           </div>
         </div>
       </div>
