@@ -1,16 +1,16 @@
 import Hero from '@/components/sections/Hero';
-import WhatIsProvox from '@/components/sections/WhatIsProvox';
-import WhatWeOffer from '@/components/sections/WhatWeOffer';
-import WhatYoullLearn from '@/components/sections/WhatYoullLearn';
+import StatBar from '@/components/sections/StatBar';
+import Programs from '@/components/sections/Programs';
+import About from '@/components/sections/About';
 import Contact from '@/components/sections/Contact';
 
 export default function HomePage() {
   return (
-    <main>
+    <main style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <Hero />
-      <WhatIsProvox />
-      <WhatWeOffer />
-      <WhatYoullLearn />
+      <StatBar />
+      <Programs />
+      <About />
       <Contact />
     </main>
   );

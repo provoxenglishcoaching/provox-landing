@@ -1,54 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fffffe;
-  --foreground: #132861;
+  --background: #f9f8f4;
+  --foreground: #0f172a;
+  --primary: #132861;
+  --accent: #2abfbf;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --card: #ffffff;
+  --secondary: #f1f0ec;
+  --input-background: #ffffff;
+  --ring: #2abfbf;
+  --primary-foreground: #ffffff;
+  --accent-foreground: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-navy: #132861;
-  --color-teal: #2abfbf;
-  --color-navy-light: #1a3a7a;
-  --color-offwhite: #f7f6f2;
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-secondary: var(--secondary);
   --font-sans: var(--next-nunito);
   --font-montserrat: var(--next-montserrat);
-  --font-body: var(--next-nunito);
-  --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-fade-in: fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
+* { box-sizing: border-box; }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--next-nunito), 'Nunito Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 html { scroll-behavior: smooth; }
 
 section[id] { scroll-margin-top: 64px; }
-
-.animate-fade-up { animation: var(--animate-fade-up); }
-.animate-fade-in { animation: var(--animate-fade-in); }
-
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.15s; }
-.stagger-3 { animation-delay: 0.25s; }
-.stagger-4 { animation-delay: 0.35s; }
-.stagger-5 { animation-delay: 0.45s; }
-.stagger-6 { animation-delay: 0.55s; }
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-up, .animate-fade-in { animation: none; }
-}

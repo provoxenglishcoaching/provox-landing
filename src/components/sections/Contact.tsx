@@ -1,92 +1,74 @@
-import { useTranslations } from 'next-intl';
-import ZaloCTA from '@/components/ui/ZaloCTA';
-import KakaoCTA from '@/components/ui/KakaoCTA';
 import ContactForm from '@/components/ui/ContactForm';
-import AnimateIn from '@/components/ui/AnimateIn';
 
 export default function Contact() {
-  const t = useTranslations('contact');
-
   return (
-    <section id="contact" className="bg-navy py-24 px-4 relative overflow-hidden">
-      {/* Dot texture */}
-      <div
-        className="absolute inset-0 opacity-[0.06] pointer-events-none"
-        aria-hidden="true"
-        style={{
-          backgroundImage: 'radial-gradient(circle, #2abfbf 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-        }}
-      />
+    <section id="contact" className="border-t" style={{ borderColor: 'var(--border)', background: 'var(--secondary)' }}>
+      <div className="max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-[1fr_1.4fr] gap-12 md:gap-20">
 
-      <div className="max-w-5xl mx-auto relative z-10">
-        <AnimateIn className="mb-12">
-          <p className="font-montserrat text-teal uppercase tracking-[0.25em] text-xs font-semibold mb-3">
-            Get in Touch
+        {/* Left — contact info */}
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] font-semibold mb-4" style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
+            Contact
           </p>
-          <h2 className="font-montserrat font-bold text-white text-3xl md:text-4xl mb-3">
-            {t('heading')}
+          <h2 className="text-4xl md:text-5xl leading-tight mb-6 font-bold" style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>
+            Let's talk about your goals
           </h2>
-          <p className="text-white/60 text-lg font-body">{t('subheading')}</p>
-        </AnimateIn>
+          <p className="leading-relaxed mb-10" style={{ color: 'var(--muted-foreground)' }}>
+            Start with a free 30-minute consultation. No commitment. Just a conversation about your goals — and I'll tell you honestly whether we're a good fit.
+          </p>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Quick contact */}
-          <AnimateIn delay={100} className="flex flex-col gap-3">
-            <ZaloCTA label={t('zaloLabel')} />
-            <KakaoCTA label={t('kakaoLabel')} id="BradHerdt" />
-
-            {/* Email */}
-            <a
-              href="mailto:brad@provoxcoach.com"
-              className="flex items-center justify-center gap-3 bg-white/8 text-white border border-white/15 px-6 py-4 rounded-xl font-semibold hover:bg-white/12 transition-colors focus:outline-none focus:ring-2 focus:ring-teal"
-            >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <div className="flex flex-col gap-5">
+            <a href="mailto:brad@provoxcoach.com"
+              className="flex items-center gap-3 text-sm transition-colors hover:opacity-80"
+              style={{ color: 'var(--foreground)' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent)', flexShrink: 0 }}>
+                <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
               </svg>
-              <span className="font-body text-sm">brad@provoxcoach.com</span>
+              brad@provoxcoach.com
             </a>
 
-            {/* Social links */}
-            <div className="flex gap-3">
-              <a
-                href="https://www.facebook.com/provoxenglish"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="ProVox on Facebook"
-                className="flex-1 flex items-center justify-center gap-2 bg-white/8 text-white border border-white/15 px-4 py-3 rounded-xl font-semibold hover:bg-white/12 transition-colors focus:outline-none focus:ring-2 focus:ring-teal text-sm"
-              >
-                <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-                <span className="font-body">Facebook</span>
-              </a>
-              <a
-                href="https://www.linkedin.com/in/bradherdt/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Coach Brad on LinkedIn"
-                className="flex-1 flex items-center justify-center gap-2 bg-white/8 text-white border border-white/15 px-4 py-3 rounded-xl font-semibold hover:bg-white/12 transition-colors focus:outline-none focus:ring-2 focus:ring-teal text-sm"
-              >
-                <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-                <span className="font-body">LinkedIn</span>
-              </a>
+            <div className="flex items-center gap-3 text-sm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent)', flexShrink: 0 }}>
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <span>Zalo: 0965869015</span>
             </div>
 
-            <p className="text-center text-white/40 text-xs font-body pt-1">
-              {t('responseNote')}
-            </p>
-          </AnimateIn>
+            <div className="flex items-center gap-3 text-sm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent)', flexShrink: 0 }}>
+                <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+              </svg>
+              <span>KakaoTalk: BradHerdt</span>
+            </div>
 
-          {/* Email form */}
-          <AnimateIn delay={200} className="bg-white rounded-2xl p-6 md:p-8 shadow-2xl">
-            <h3 className="font-montserrat font-bold text-navy text-base mb-5">
-              {t('emailHeading')}
-            </h3>
-            <ContactForm />
-          </AnimateIn>
+            <a href="https://facebook.com/provoxenglish" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 text-sm transition-colors hover:opacity-80"
+              style={{ color: 'var(--foreground)' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent)', flexShrink: 0 }}>
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+              facebook.com/provoxenglish
+            </a>
+
+            <a href="https://linkedin.com/in/bradherdt" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 text-sm transition-colors hover:opacity-80"
+              style={{ color: 'var(--foreground)' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent)', flexShrink: 0 }}>
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                <rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>
+              </svg>
+              linkedin.com/in/bradherdt
+            </a>
+
+            <p className="text-xs border-t pt-4" style={{ color: 'var(--muted-foreground)', borderColor: 'var(--border)' }}>
+              Indochina Time (ICT) · GMT+7 · Response within 24 hours
+            </p>
+          </div>
+        </div>
+
+        {/* Right — form */}
+        <div className="border p-8 rounded-sm" style={{ background: 'var(--card)', borderColor: 'var(--border)', borderRadius: '2px' }}>
+          <ContactForm />
         </div>
       </div>
     </section>
