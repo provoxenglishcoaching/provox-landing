@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -11,16 +10,11 @@ export default function Navbar() {
       style={{ background: 'rgba(249,248,244,0.92)', backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 
-        {/* Logo */}
-        <a href="#" aria-label="ProVox home">
-          <Image
-            src="/logo-light.svg"
-            alt="ProVox Professional English Coaching"
-            width={160}
-            height={52}
-            priority
-            className="h-10 w-auto"
-          />
+        {/* Home text link instead of logo */}
+        <a href="#"
+          className="text-sm font-semibold transition-colors hover:opacity-70"
+          style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em' }}>
+          Home
         </a>
 
         {/* Desktop nav */}
@@ -57,7 +51,8 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t px-6 py-5 flex flex-col gap-4" style={{ borderColor: 'var(--border)', background: 'var(--background)' }}>
+        <div className="md:hidden border-t px-6 py-5 flex flex-col gap-4"
+          style={{ borderColor: 'var(--border)', background: 'var(--background)' }}>
           {[['Programs', '#programs'], ['About', '#about'], ['Contact', '#contact']].map(([label, href]) => (
             <a key={href} href={href} onClick={() => setMenuOpen(false)}
               className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>

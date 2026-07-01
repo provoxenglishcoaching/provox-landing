@@ -5,24 +5,41 @@ export default function Hero() {
     <section className="pt-16 min-h-screen grid md:grid-cols-2 items-center max-w-6xl mx-auto px-6 gap-12 md:gap-20">
       {/* Left — text */}
       <div className="pt-16 md:pt-0">
-        <p className="text-xs uppercase tracking-[0.2em] font-semibold mb-6" style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
+        <p className="text-xs uppercase tracking-[0.2em] font-semibold mb-8" style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
           Professional English Coaching
         </p>
-        <h1 className="leading-[1.25] mb-6" style={{
+
+        {/* Logo — prominent, above the tagline */}
+        <div className="mb-10">
+          <Image
+            src="/logo-light.svg"
+            alt="ProVox Professional English Coaching"
+            width={280}
+            height={96}
+            priority
+            className="w-56 md:w-72 h-auto"
+          />
+        </div>
+
+        {/* Tagline — light weight, generous line spacing */}
+        <h1 style={{
           fontFamily: 'Montserrat, sans-serif',
-          fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',
+          fontSize: 'clamp(2.2rem, 4.5vw, 3.5rem)',
           fontWeight: 300,
           color: 'var(--primary)',
           letterSpacing: '-0.01em',
+          lineHeight: 1.6,
+          marginBottom: '1.75rem',
         }}>
           Natural.<br />
           Confident.<br />
-          English for<br />
-          adults.
+          English for adults.
         </h1>
+
         <p className="text-lg leading-relaxed mb-10 max-w-md" style={{ color: 'var(--muted-foreground)' }}>
-          A premium 1-on-1 coaching program for adults who want to speak English with confidence.
+          A premium coaching program for adults who want to speak English with confidence.
         </p>
+
         <div className="flex flex-col sm:flex-row gap-4">
           <a href="#contact"
             className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-semibold transition-opacity hover:opacity-90 group"
@@ -53,10 +70,10 @@ export default function Hero() {
           />
         </div>
         {/* Floating badge */}
-        <div className="absolute -left-6 bottom-12 border shadow-lg px-5 py-4 max-w-[200px]"
+        <div className="absolute -left-6 bottom-12 border shadow-lg px-5 py-4 max-w-[220px]"
           style={{ background: 'var(--card)', borderColor: 'var(--border)', borderRadius: '2px' }}>
-          <p className="text-2xl font-bold" style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>1-on-1</p>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>Every session, personalized to you</p>
+          <p className="text-xl font-bold" style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>1-on-1 or in small groups</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>Every session, personalized to you</p>
         </div>
       </div>
     </section>
