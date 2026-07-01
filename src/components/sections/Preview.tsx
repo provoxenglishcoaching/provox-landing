@@ -15,9 +15,9 @@ export default function Preview() {
             style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
             See it for yourself
           </p>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight"
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight whitespace-nowrap"
             style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>
-            See what a ProVox session looks like
+            What skills does ProVox teach?
           </h2>
           <p className="text-base leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
             This is a sample audio exercise from session 11 in the VOX: Professional Communication curriculum.

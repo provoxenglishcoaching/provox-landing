@@ -5,10 +5,6 @@ export default function Hero() {
     <section className="pt-16 min-h-screen grid md:grid-cols-2 items-center max-w-6xl mx-auto px-6 gap-12 md:gap-20">
       {/* Left — text */}
       <div className="pt-16 md:pt-0">
-        <p className="text-xs uppercase tracking-[0.2em] font-semibold mb-8" style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
-          Professional English Coaching
-        </p>
-
         {/* Logo — prominent, above the tagline */}
         <div className="mb-10">
           <Image
@@ -69,11 +65,12 @@ export default function Hero() {
             priority
           />
         </div>
-        {/* Floating badge */}
-        <div className="absolute -left-6 bottom-12 border shadow-lg px-5 py-4 max-w-[220px]"
+        {/* Floating badge — top left of image */}
+        <div className="absolute -left-6 top-10 border shadow-lg px-5 py-4"
           style={{ background: 'var(--card)', borderColor: 'var(--border)', borderRadius: '2px' }}>
-          <p className="text-xl font-bold" style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>1-on-1 or in small groups</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>Every session, personalized to you</p>
+          <p className="text-lg font-bold text-center" style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>1-on-1</p>
+          <div className="my-2" style={{ borderTop: '1px solid var(--border)' }} />
+          <p className="text-lg font-bold text-center" style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>or in groups</p>
         </div>
       </div>
     </section>
