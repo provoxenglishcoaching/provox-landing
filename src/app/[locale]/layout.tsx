@@ -72,7 +72,8 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={`${montserrat.variable} ${nunitoSans.variable}`}>
-      <head> <meta property="og:image" content="https://www.provoxcoach.com/og-image.png" />
+      <head>
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta property="og:image" content="https://www.provoxcoach.com/og-image.png" />
         <meta property="og:image:width" content="1536" />
         <meta property="og:image:height" content="768" />

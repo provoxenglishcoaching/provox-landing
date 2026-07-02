@@ -3,6 +3,17 @@ import Image from 'next/image';
 export default function About() {
   return (
     <section id="about" className="border-t" style={{ borderColor: 'var(--border)', background: 'linear-gradient(135deg, #132861 60%, #1a3a7a 100%)' }}>
+      {/* "Who will coach me?" intro strip */}
+      <div className="border-b px-6 py-10 text-center" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+        <p className="text-xs uppercase tracking-[0.2em] font-semibold mb-3"
+          style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
+          Your coach
+        </p>
+        <h2 className="text-3xl md:text-4xl font-bold text-white"
+          style={{ fontFamily: 'Montserrat, sans-serif' }}>
+          Who will coach me?
+        </h2>
+      </div>
       <div className="max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-[1fr_1.2fr] gap-12 md:gap-20 items-center">
 
         {/* Photo */}
@@ -23,10 +34,10 @@ export default function About() {
         {/* Bio */}
         <div className="text-white">
           <p className="text-xs uppercase tracking-[0.2em] font-semibold mb-6" style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
-            About
+            Meet your coach
           </p>
           <h2 className="text-4xl md:text-5xl leading-tight mb-6 font-bold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-            I help adults communicate naturally in English
+            I help adults speak English with confidence
           </h2>
           <p className="leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.7)' }}>
             I'm Brad Herdt, founder of ProVox and a certified English coach with over a decade of experience working with adults across Vietnam and beyond.

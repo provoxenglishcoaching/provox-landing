@@ -17,11 +17,10 @@ export default function Preview() {
           </p>
           <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight whitespace-nowrap"
             style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>
-            What skills does ProVox teach?
+            What skills will I learn?
           </h2>
           <p className="text-base leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
-            This is a sample audio exercise from session 11 in the VOX: Professional Communication curriculum.
-            You can also check out a preview of the book.
+            ProVox teaches communication skills that you can use in real situations. For example, how should you respond when a disagreement happens? Listen to this sample audio exercise from session 11 in the VOX: Professional Communication curriculum. You can also check out a preview of the book to see what other types of skills you will learn.
           </p>
         </div>
 

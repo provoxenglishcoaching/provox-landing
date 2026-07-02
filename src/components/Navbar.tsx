@@ -19,7 +19,7 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
-          {[['Programs', '#programs'], ['About', '#about'], ['Contact', '#contact']].map(([label, href]) => (
+          {[['Programs', '#programs'], ['Meet your coach', '#about'], ['Contact', '#contact']].map(([label, href]) => (
             <a key={href} href={href}
               className="text-sm font-medium transition-colors"
               style={{ color: 'var(--muted-foreground)' }}
@@ -53,7 +53,7 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden border-t px-6 py-5 flex flex-col gap-4"
           style={{ borderColor: 'var(--border)', background: 'var(--background)' }}>
-          {[['Programs', '#programs'], ['About', '#about'], ['Contact', '#contact']].map(([label, href]) => (
+          {[['Programs', '#programs'], ['Meet your coach', '#about'], ['Contact', '#contact']].map(([label, href]) => (
             <a key={href} href={href} onClick={() => setMenuOpen(false)}
               className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>
               {label}

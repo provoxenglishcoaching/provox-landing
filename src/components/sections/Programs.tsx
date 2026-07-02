@@ -23,7 +23,7 @@ export default function Programs() {
         </p>
         <h2 className="text-4xl md:text-5xl leading-tight font-bold"
           style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>
-          Tailored to your specific goals
+          What program is best for me?
         </h2>
         <p className="mt-4" style={{ color: 'var(--muted-foreground)' }}>
           Two programs. One goal — English that works for you.
@@ -39,7 +39,7 @@ export default function Programs() {
           <div className="flex items-start justify-between gap-4 mb-3">
             <span className="text-xs uppercase tracking-[0.14em] font-semibold"
               style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
-              Workplace English
+              Business English
             </span>
             <span className="text-xs text-right" style={{ color: 'var(--muted-foreground)' }}>
               6,990,000₫ / month
@@ -74,7 +74,7 @@ export default function Programs() {
           <div className="flex items-start justify-between gap-4 mb-3">
             <span className="text-xs uppercase tracking-[0.14em] font-semibold"
               style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
-              Everyday English
+              Essential English
             </span>
             <span className="text-xs text-right" style={{ color: 'var(--muted-foreground)' }}>
               5,990,000₫ / month

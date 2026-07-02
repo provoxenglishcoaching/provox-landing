@@ -24,7 +24,7 @@ export default function Hero() {
           fontWeight: 300,
           color: 'var(--primary)',
           letterSpacing: '-0.01em',
-          lineHeight: 1.6,
+          lineHeight: 1.85,
           marginBottom: '1.75rem',
         }}>
           Natural.<br />
@@ -65,13 +65,7 @@ export default function Hero() {
             priority
           />
         </div>
-        {/* Floating badge — top left of image */}
-        <div className="absolute -left-6 top-10 border shadow-lg px-5 py-4"
-          style={{ background: 'var(--card)', borderColor: 'var(--border)', borderRadius: '2px' }}>
-          <p className="text-lg font-bold text-center" style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>1-on-1</p>
-          <div className="my-2" style={{ borderTop: '1px solid var(--border)' }} />
-          <p className="text-lg font-bold text-center" style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>or in groups</p>
-        </div>
+
       </div>
     </section>
   );
