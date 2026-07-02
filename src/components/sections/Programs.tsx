@@ -21,7 +21,7 @@ export default function Programs() {
           style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
           Programs
         </p>
-        <h2 className="text-4xl md:text-5xl leading-tight font-bold"
+        <h2 className="text-3xl md:text-4xl leading-tight font-bold"
           style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>
           What program is best for me?
         </h2>
