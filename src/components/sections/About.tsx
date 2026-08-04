@@ -1,11 +1,12 @@
 import Image from 'next/image';
 
-const coaches = [
+const coaches: { id: string; name: string; photo: string; alt: string; objectPosition: string; cert: string; bio: string[] }[] = [
   {
     id: 'brad',
     name: 'Coach Brad',
     photo: '/brad-photo.png',
     alt: 'Brad Herdt — ProVox English Coach',
+    objectPosition: 'center 20%',
     cert: 'TESOL/TEFL Certified — Global Leadership College',
     bio: [
       "I'm Brad Herdt, founder of ProVox and a certified English coach with over a decade of experience working with adults across Vietnam and beyond.",
@@ -19,6 +20,7 @@ const coaches = [
     name: 'Coach Khoa',
     photo: '/khoa-photo.jpg',
     alt: 'Coach Khoa — ProVox English Coach',
+    objectPosition: 'center top',
     cert: 'Australian · Based in Vietnam since 2014',
     bio: [
       "I'm an Australian with Vietnamese heritage and have been living and working in Vietnam since 2014. During that time, I've travelled extensively across the country and worked with people from a wide range of industries, cultures, and professional backgrounds.",
@@ -68,7 +70,8 @@ export default function About() {
                     src={coach.photo}
                     alt={coach.alt}
                     fill
-                    className="object-cover object-center"
+                    className="object-cover"
+                    style={{ objectPosition: coach.objectPosition }}
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                 </div>
