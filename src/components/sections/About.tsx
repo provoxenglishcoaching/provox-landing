@@ -33,14 +33,16 @@ export default function About() {
   return (
     <section id="about">
       {/* Section intro — outside dark box, left aligned */}
+      {/* "Who will coach me?" is now the small teal label */}
+      {/* "Meet the ProVox Team" is now the big bold heading */}
       <div className="border-t px-6 py-16 max-w-6xl mx-auto" style={{ borderColor: 'var(--border)' }}>
         <p className="text-xs uppercase tracking-[0.2em] font-semibold mb-4"
           style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
-          Meet the ProVox team
+          Who will coach me?
         </p>
         <h2 className="text-3xl md:text-4xl font-bold"
           style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>
-          Who will coach me?
+          Meet the ProVox Team
         </h2>
       </div>
 
@@ -53,27 +55,26 @@ export default function About() {
             {coaches.map((coach) => (
               <div key={coach.id} className="flex flex-col">
 
-                {/* Coach name above photo */}
-                <p className="text-xs uppercase tracking-[0.2em] font-semibold mb-4"
-                  style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
+                {/* Coach name — big and prominent */}
+                <h3 className="text-2xl md:text-3xl font-bold mb-6 text-white"
+                  style={{ fontFamily: 'Montserrat, sans-serif' }}>
                   {coach.name}
-                </p>
+                </h3>
 
-                {/* Photo */}
-                <div className="relative mb-8">
-                  <div className="overflow-hidden w-full"
-                    style={{ aspectRatio: '4/5', borderRadius: '2px', background: 'rgba(19,40,97,0.4)', maxHeight: '380px' }}>
-                    <Image
-                      src={coach.photo}
-                      alt={coach.alt}
-                      width={400}
-                      height={500}
-                      className="w-full h-full object-cover object-top"
-                    />
-                  </div>
-                  <div className="absolute -bottom-4 left-0 h-px w-16"
-                    style={{ background: 'rgba(42,191,191,0.7)' }} aria-hidden="true" />
+                {/* Photo — square crop, face centered */}
+                <div className="relative mb-8 w-full overflow-hidden"
+                  style={{ aspectRatio: '1/1', borderRadius: '2px', maxWidth: '420px' }}>
+                  <Image
+                    src={coach.photo}
+                    alt={coach.alt}
+                    fill
+                    className="object-cover object-center"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
                 </div>
+
+                {/* Teal accent line */}
+                <div className="mb-8 w-12 h-px" style={{ background: 'rgba(42,191,191,0.7)' }} aria-hidden="true" />
 
                 {/* Bio paragraphs */}
                 <div className="flex flex-col gap-4 flex-1">
