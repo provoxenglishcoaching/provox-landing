@@ -20,7 +20,7 @@ const coaches: { id: string; name: string; photo: string; alt: string; objectPos
     name: 'Coach Khoa',
     photo: '/khoa-photo.jpg',
     alt: 'Coach Khoa — ProVox English Coach',
-    objectPosition: 'center top',
+    objectPosition: 'center 15%',
     cert: 'Australian · Based in Vietnam since 2014',
     bio: [
       "I'm an Australian with Vietnamese heritage and have been living and working in Vietnam since 2014. During that time, I've travelled extensively across the country and worked with people from a wide range of industries, cultures, and professional backgrounds.",
