@@ -1,0 +1,32 @@
+:root {
+  --portal-navy: var(--primary);
+  --portal-navy-700: #1c3a7a;
+  --portal-navy-050: #eef1f6;
+  --portal-turq: var(--accent);
+  --portal-turq-600: #22a6a6;
+  --portal-turq-100: #e3f7f6;
+  --portal-slate: #8a9bb5;
+  --portal-slate-200: #d8dfea;
+  --portal-off: var(--background);
+  --portal-ok: #2e9e6f;
+  --portal-shadow: 0 6px 24px rgba(19, 40, 97, 0.08);
+  --portal-shadow-lg: 0 20px 60px rgba(19, 40, 97, 0.16);
+}
+
+.portal-body {
+  min-height: 100vh;
+  background: var(--portal-off);
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-wave-anim {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .portal-coach-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
