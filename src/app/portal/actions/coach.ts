@@ -1,5 +1,6 @@
 'use server';
 
+import { put } from '@vercel/blob';
 import { revalidatePath } from 'next/cache';
 import {
   createStudent,
@@ -11,10 +12,12 @@ import {
   getSettings,
   updateMasterPasswordHash,
   setSubmissionFeedback,
+  newId,
   type AssignmentType,
 } from '../lib/db';
 import { genCode, genPassword, hashPassword, verifyPassword } from '../lib/auth';
 import { requireCoach } from '../lib/session';
+import { validateFile, sanitizeFilename } from '../lib/upload';
 
 export interface AddStudentState {
   error: string;
@@ -73,18 +76,41 @@ export async function saveCredentials(
   return { error: '' };
 }
 
-export async function addAssignment(studentId: string, formData: FormData): Promise<void> {
+export interface AddAssignmentState {
+  error: string;
+}
+
+export async function addAssignment(
+  studentId: string,
+  _prevState: AddAssignmentState,
+  formData: FormData
+): Promise<AddAssignmentState> {
   await requireCoach();
   const title = String(formData.get('title') ?? '').trim();
-  if (!title) return;
+  if (!title) return { error: 'Enter a title.' };
 
   const type = String(formData.get('type') ?? 'Homework') as AssignmentType;
   const description = String(formData.get('description') ?? '').trim();
   const url = String(formData.get('url') ?? '').trim();
   const dueDate = String(formData.get('dueDate') ?? '').trim() || null;
 
-  await createAssignment({ studentId, title, type, description, url, dueDate });
+  const file = formData.get('file');
+  let fileUrl: string | null = null;
+  let fileName: string | null = null;
+
+  if (file instanceof File && file.size > 0) {
+    const validationError = validateFile(file);
+    if (validationError) return { error: validationError };
+
+    const pathname = `assignments/${studentId}/${newId('f')}-${sanitizeFilename(file.name)}`;
+    const blob = await put(pathname, file, { access: 'private', addRandomSuffix: false });
+    fileUrl = blob.url;
+    fileName = file.name;
+  }
+
+  await createAssignment({ studentId, title, type, description, url, fileUrl, fileName, dueDate });
   revalidatePath('/portal/coach');
+  return { error: '' };
 }
 
 export async function removeAssignment(assignmentId: string): Promise<void> {

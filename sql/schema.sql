@@ -28,6 +28,8 @@ create table if not exists assignments (
   type text not null check (type in ('Homework', 'Material', 'Resource')),
   description text not null default '',
   url text not null default '',
+  file_url text,
+  file_name text,
   due_date date,
   date_assigned date not null default current_date,
   status text not null default 'assigned' check (status in ('assigned', 'completed')),

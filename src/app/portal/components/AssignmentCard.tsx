@@ -119,6 +119,19 @@ export default function AssignmentCard({
               Open link
             </a>
           )}
+          {assignment.file_url && (
+            <a
+              href={`/portal/files?type=assignment&id=${assignment.id}`}
+              style={{ color: 'var(--portal-turq-600)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3v12" />
+                <path d="m7 10 5 5 5-5" />
+                <path d="M5 21h14" />
+              </svg>
+              {assignment.file_name ?? 'Download file'}
+            </a>
+          )}
         </div>
       </div>
 

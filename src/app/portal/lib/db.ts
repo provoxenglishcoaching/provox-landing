@@ -44,6 +44,8 @@ export interface AssignmentRow {
   type: AssignmentType;
   description: string;
   url: string;
+  file_url: string | null;
+  file_name: string | null;
   due_date: string | null;
   date_assigned: string;
   status: AssignmentStatus;
@@ -202,12 +204,14 @@ export async function createAssignment(input: {
   type: AssignmentType;
   description: string;
   url: string;
+  fileUrl: string | null;
+  fileName: string | null;
   dueDate: string | null;
 }): Promise<void> {
   const id = newId('as');
   await sql`
-    insert into assignments (id, student_id, title, type, description, url, due_date)
-    values (${id}, ${input.studentId}, ${input.title}, ${input.type}, ${input.description}, ${input.url}, ${input.dueDate})
+    insert into assignments (id, student_id, title, type, description, url, file_url, file_name, due_date)
+    values (${id}, ${input.studentId}, ${input.title}, ${input.type}, ${input.description}, ${input.url}, ${input.fileUrl}, ${input.fileName}, ${input.dueDate})
   `;
 }
 

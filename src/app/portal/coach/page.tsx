@@ -2,11 +2,12 @@ import Link from 'next/link';
 import { requireCoach } from '../lib/session';
 import { listStudents, getProgressByStudent, getAssignmentsForStudent, getSubmissionsForStudent } from '../lib/db';
 import { logout } from '../actions/auth';
-import { removeStudent, removeAssignment, addAssignment } from '../actions/coach';
+import { removeStudent, removeAssignment } from '../actions/coach';
 import WaveProgress from '../components/WaveProgress';
 import AssignmentCard from '../components/AssignmentCard';
 import AddStudentForm from '../components/AddStudentForm';
 import CredentialsForm from '../components/CredentialsForm';
+import AssignForm from '../components/AssignForm';
 import SubmissionCard from '../components/SubmissionCard';
 import FeedbackForm from '../components/FeedbackForm';
 
@@ -121,45 +122,7 @@ export default async function CoachDashboard({
 
                 <CredentialsForm studentId={selected.id} firstName={selected.name.split(' ')[0]} code={selected.code} />
 
-                <form
-                  action={addAssignment.bind(null, selected.id)}
-                  style={{ background: 'var(--portal-navy-050)', borderRadius: '12px', padding: '16px', margin: '18px 0 22px' }}
-                >
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-                    <div>
-                      <label style={fieldLabel}>Title</label>
-                      <input name="title" type="text" placeholder="e.g. Practice: Handling Disagreement" required maxLength={90} style={fieldInput} />
-                    </div>
-                    <div>
-                      <label style={fieldLabel}>Type</label>
-                      <select name="type" style={fieldInput} defaultValue="Homework">
-                        <option value="Homework">Homework</option>
-                        <option value="Material">Material</option>
-                        <option value="Resource">Resource Link</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: '10px' }}>
-                    <label style={fieldLabel}>Instructions / notes</label>
-                    <textarea name="description" placeholder="What should they do with this?" style={{ ...fieldInput, resize: 'vertical', minHeight: '56px' }} />
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
-                    <div>
-                      <label style={fieldLabel}>Link (optional)</label>
-                      <input name="url" type="url" placeholder="https://…" style={fieldInput} />
-                    </div>
-                    <div>
-                      <label style={fieldLabel}>Due date (optional)</label>
-                      <input name="dueDate" type="date" style={fieldInput} />
-                    </div>
-                  </div>
-                  <button
-                    type="submit"
-                    style={{ background: 'var(--portal-navy)', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 18px', fontWeight: 700, fontSize: '13.5px', cursor: 'pointer' }}
-                  >
-                    Send to {selected.name.split(' ')[0]}
-                  </button>
-                </form>
+                <AssignForm studentId={selected.id} firstName={selected.name.split(' ')[0]} />
 
                 {assignments.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '36px 16px', color: '#6b7a93', fontSize: '13.5px', lineHeight: 1.6 }}>
@@ -195,22 +158,3 @@ export default async function CoachDashboard({
     </main>
   );
 }
-
-const fieldLabel: React.CSSProperties = {
-  display: 'block',
-  fontSize: '11.5px',
-  fontWeight: 700,
-  color: '#4f5f7c',
-  textTransform: 'uppercase',
-  letterSpacing: '0.04em',
-  marginBottom: '5px',
-};
-
-const fieldInput: React.CSSProperties = {
-  width: '100%',
-  padding: '9px 11px',
-  border: '1px solid var(--portal-slate-200)',
-  borderRadius: '8px',
-  fontSize: '13.5px',
-  background: '#fff',
-};
