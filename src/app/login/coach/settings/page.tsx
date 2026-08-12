@@ -12,7 +12,7 @@ export default async function CoachSettings() {
           Settings
         </h1>
         <Link
-          href="/portal/coach"
+          href="/login/coach"
           style={{ background: 'transparent', border: '1px solid var(--portal-slate-200)', color: 'var(--portal-navy)', padding: '8px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
         >
           Back to dashboard

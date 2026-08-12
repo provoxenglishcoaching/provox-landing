@@ -47,7 +47,7 @@ export default function SubmissionCard({
       )}
       {submission.file_url && (
         <a
-          href={`/portal/files?id=${submission.id}`}
+          href={`/login/files?id=${submission.id}`}
           style={{ color: 'var(--portal-turq-600)', fontWeight: 700, textDecoration: 'none', fontSize: '12.5px', display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

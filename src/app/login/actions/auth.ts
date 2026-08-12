@@ -55,7 +55,7 @@ async function loginAsCoach(password: string): Promise<LoginState> {
   session.role = 'coach';
   session.studentId = undefined;
   await session.save();
-  redirect('/portal/coach');
+  redirect('/login/coach');
 }
 
 async function loginAsStudent(code: string, password: string): Promise<LoginState> {
@@ -75,11 +75,11 @@ async function loginAsStudent(code: string, password: string): Promise<LoginStat
   session.role = 'student';
   session.studentId = student.id;
   await session.save();
-  redirect('/portal/student');
+  redirect('/login/student');
 }
 
 export async function logout(): Promise<void> {
   const session = await getSession();
   session.destroy();
-  redirect('/portal');
+  redirect('/login');
 }

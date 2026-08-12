@@ -1,7 +1,6 @@
 import Hero from '@/components/sections/Hero';
-import StatBar from '@/components/sections/StatBar';
+import Courses from '@/components/sections/Courses';
 import Preview from '@/components/sections/Preview';
-import Programs from '@/components/sections/Programs';
 import About from '@/components/sections/About';
 import Contact from '@/components/sections/Contact';
 
@@ -9,9 +8,8 @@ export default function HomePage() {
   return (
     <main style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <Hero />
-      <StatBar />
+      <Courses />
       <Preview />
-      <Programs />
       <About />
       <Contact />
     </main>

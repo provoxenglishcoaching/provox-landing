@@ -13,11 +13,11 @@ export default function Preview() {
         <div className="mb-12 max-w-2xl">
           <p className="text-xs uppercase tracking-[0.2em] font-semibold mb-4"
             style={{ color: 'var(--accent)', fontFamily: 'Montserrat, sans-serif' }}>
-            See it for yourself
+            Preview
           </p>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight whitespace-nowrap"
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight"
             style={{ color: 'var(--primary)', fontFamily: 'Montserrat, sans-serif' }}>
-            What skills will I learn?
+            See for yourself
           </h2>
           <p className="text-base leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
             ProVox teaches communication skills that you can use in real situations. For example, how should you respond when a disagreement happens? Listen to this sample audio exercise from session 11 in the VOX: Professional Communication curriculum. You can also check out a preview of the book to see what other types of skills you will learn.

@@ -1,8 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import { useActionState } from 'react';
 import { login, type LoginState } from '../actions/auth';
-import BrandWave from './BrandWave';
 
 const initialState: LoginState = { error: '' };
 
@@ -47,23 +47,30 @@ export default function SignInForm() {
         width: '100%',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
-        <BrandWave size={40} />
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '22px' }}>
+        <Image
+          src="/logo-light.svg"
+          alt="ProVox — Professional English Coaching"
+          width={420}
+          height={340}
+          priority
+          style={{ width: '160px', height: 'auto' }}
+        />
       </div>
       <h2
         style={{
           margin: '0 0 6px',
-          fontSize: '18px',
+          fontSize: '19px',
           color: 'var(--portal-navy)',
           textAlign: 'center',
           fontFamily: 'var(--next-montserrat), sans-serif',
           fontWeight: 700,
         }}
       >
-        ProVox Portal Sign In
+        Student Sign-in
       </h2>
       <p style={{ margin: '0 0 22px', fontSize: '13px', color: '#6b7a93', textAlign: 'center', lineHeight: 1.5 }}>
-        Enter the code and password your coach gave you.
+        Enter your student code and password
       </p>
 
       {state?.error && (

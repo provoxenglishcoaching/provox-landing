@@ -24,12 +24,12 @@ export async function getSession() {
 
 export async function requireCoach() {
   const session = await getSession();
-  if (session.role !== 'coach') redirect('/portal');
+  if (session.role !== 'coach') redirect('/login');
   return session;
 }
 
 export async function requireStudent() {
   const session = await getSession();
-  if (session.role !== 'student' || !session.studentId) redirect('/portal');
+  if (session.role !== 'student' || !session.studentId) redirect('/login');
   return session as PortalSessionData & { studentId: string };
 }

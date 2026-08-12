@@ -7,7 +7,7 @@
   --portal-turq-100: #e3f7f6;
   --portal-slate: #8a9bb5;
   --portal-slate-200: #d8dfea;
-  --portal-off: var(--background);
+  --portal-off: #f9f8f4;
   --portal-ok: #2e9e6f;
   --portal-shadow: 0 6px 24px rgba(19, 40, 97, 0.08);
   --portal-shadow-lg: 0 20px 60px rgba(19, 40, 97, 0.16);

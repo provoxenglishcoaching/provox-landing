@@ -38,7 +38,7 @@ export async function addStudent(
   const passwordHash = await hashPassword(password);
 
   const student = await createStudent(name, code, passwordHash);
-  revalidatePath('/portal/coach');
+  revalidatePath('/login/coach');
   // The plaintext password only ever exists here, in memory, right after
   // generation -- once hashed it can never be shown again, so this is the
   // one and only chance to hand it to the coach.
@@ -48,7 +48,7 @@ export async function addStudent(
 export async function removeStudent(studentId: string): Promise<void> {
   await requireCoach();
   await deleteStudent(studentId);
-  revalidatePath('/portal/coach');
+  revalidatePath('/login/coach');
 }
 
 export interface CredentialsState {
@@ -72,7 +72,7 @@ export async function saveCredentials(
 
   const passwordHash = password ? await hashPassword(password) : null;
   await updateStudentCredentials(studentId, code, passwordHash);
-  revalidatePath('/portal/coach');
+  revalidatePath('/login/coach');
   return { error: '' };
 }
 
@@ -109,14 +109,14 @@ export async function addAssignment(
   }
 
   await createAssignment({ studentId, title, type, description, url, fileUrl, fileName, dueDate });
-  revalidatePath('/portal/coach');
+  revalidatePath('/login/coach');
   return { error: '' };
 }
 
 export async function removeAssignment(assignmentId: string): Promise<void> {
   await requireCoach();
   await deleteAssignment(assignmentId);
-  revalidatePath('/portal/coach');
+  revalidatePath('/login/coach');
 }
 
 export interface ChangePasswordState {
@@ -150,5 +150,5 @@ export async function reviewSubmission(submissionId: string, formData: FormData)
   await requireCoach();
   const feedback = String(formData.get('feedback') ?? '').trim();
   await setSubmissionFeedback(submissionId, feedback);
-  revalidatePath('/portal/coach');
+  revalidatePath('/login/coach');
 }

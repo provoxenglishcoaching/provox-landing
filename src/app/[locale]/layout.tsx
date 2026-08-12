@@ -32,8 +32,6 @@ export async function generateMetadata({
   const { locale } = await params;
   const titles: Record<string, string> = {
     en: 'ProVox — Professional English Coaching',
-    ko: 'ProVox — 비즈니스 영어 코칭',
-    vi: 'ProVox — Luyện Tiếng Anh Chuyên Nghiệp',
   };
   const description = 'A premium coaching program for adults who want to speak English with confidence.';
   const ogImage = 'https://www.provoxcoach.com/og-image.png';
@@ -67,7 +65,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  if (!routing.locales.includes(locale as 'en' | 'ko' | 'vi')) notFound();
+  if (!routing.locales.includes(locale as 'en')) notFound();
   const messages = await getMessages();
 
   return (

@@ -12,7 +12,7 @@ export default async function StudentDashboard() {
   const session = await requireStudent();
 
   const student = await getStudentById(session.studentId);
-  if (!student) redirect('/portal/clear-session');
+  if (!student) redirect('/login/clear-session');
 
   const [assignments, submissions] = await Promise.all([
     getAssignmentsForStudent(student.id),

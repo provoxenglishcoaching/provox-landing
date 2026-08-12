@@ -17,7 +17,7 @@ export async function toggleAssignment(assignmentId: string): Promise<void> {
   const nextStatus = assignment.status === 'completed' ? 'assigned' : 'completed';
   const completedDate = nextStatus === 'completed' ? new Date().toISOString().slice(0, 10) : null;
   await setAssignmentStatus(assignmentId, nextStatus, completedDate);
-  revalidatePath('/portal/student');
+  revalidatePath('/login/student');
 }
 
 export interface SubmitWorkState {
@@ -51,6 +51,6 @@ export async function submitWork(
   }
 
   await createSubmission({ studentId: session.studentId, title, bodyText, fileUrl, fileName });
-  revalidatePath('/portal/student');
+  revalidatePath('/login/student');
   return { error: '', success: true };
 }

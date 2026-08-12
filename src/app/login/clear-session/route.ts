@@ -8,5 +8,5 @@ import { getSession } from '../lib/session';
 export async function GET(request: Request) {
   const session = await getSession();
   session.destroy();
-  return NextResponse.redirect(new URL('/portal', request.url));
+  return NextResponse.redirect(new URL('/login', request.url));
 }

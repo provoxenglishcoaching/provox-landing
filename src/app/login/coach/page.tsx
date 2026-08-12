@@ -34,7 +34,7 @@ export default async function CoachDashboard({
         </h1>
         <div style={{ display: 'flex', gap: '10px' }}>
           <Link
-            href="/portal/coach/settings"
+            href="/login/coach/settings"
             style={{ background: 'transparent', border: '1px solid var(--portal-slate-200)', color: 'var(--portal-navy)', padding: '8px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
           >
             Settings
@@ -65,7 +65,7 @@ export default async function CoachDashboard({
               return (
                 <Link
                   key={s.id}
-                  href={`/portal/coach?student=${s.id}`}
+                  href={`/login/coach?student=${s.id}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
