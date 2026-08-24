@@ -3,12 +3,35 @@
 import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 
-type Slide = { label: string; src: string; alt: string };
+type Slide = { label: string; src: string; alt: string; objectPosition: string };
 
+/**
+ * All three photos are 3:2 landscape dropped into a much narrower frame, so
+ * `cover` throws away roughly a third of their width. `objectPosition` aims
+ * that crop per photo rather than blindly centring it.
+ */
 const SLIDES: Slide[] = [
-  { label: 'Communication', src: '/hero-1.jpg', alt: 'Two women talking together over a laptop' },
-  { label: 'IELTS / TOEFL', src: '/hero-2.jpg', alt: 'Two students talking together outside a university' },
-  { label: 'Business English', src: '/hero-3.jpg', alt: 'A professional English coaching session' },
+  {
+    label: 'Communication',
+    src: '/hero-1.jpg',
+    alt: 'Two women talking together over a laptop',
+    // Favours the top of the frame, so the pair sit lower and keep whatever
+    // headroom the (tightly shot) original has.
+    objectPosition: '50% 15%',
+  },
+  {
+    label: 'IELTS / TOEFL',
+    src: '/hero-2.jpg',
+    alt: 'Two students talking together outside a university',
+    objectPosition: '50% 50%',
+  },
+  {
+    label: 'Business English',
+    src: '/hero-3.jpg',
+    alt: 'A professional English coaching session',
+    // Centred, this crop cut the man on the right out of frame entirely.
+    objectPosition: '85% 50%',
+  },
 ];
 
 const ROTATE_MS = 3000;
@@ -88,20 +111,28 @@ export default function HeroCarousel() {
               priority={i === 0}
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
+              style={{ objectPosition: slide.objectPosition }}
             />
 
-            {/* Scrim — keeps the white caption readable over any photo. */}
+            {/* Scrims — a heavy one under the caption at the top, and a lighter
+                one at the foot to hold the controls off the photo. */}
             <div
               aria-hidden="true"
               className="absolute inset-0"
               style={{
                 background:
-                  'linear-gradient(to top, rgba(9,18,40,0.74) 0%, rgba(9,18,40,0.30) 40%, rgba(9,18,40,0) 70%)',
+                  'linear-gradient(to bottom, rgba(9,18,40,0.80) 0%, rgba(9,18,40,0.38) 30%, rgba(9,18,40,0) 60%), ' +
+                  'linear-gradient(to top, rgba(9,18,40,0.45) 0%, rgba(9,18,40,0) 22%)',
               }}
             />
 
+            {/*
+              Sits below the fixed 80px navbar on md+, where this panel runs up
+              behind it; on mobile the panel is below the copy, so it needs no
+              such clearance.
+            */}
             <figcaption
-              className="absolute left-6 md:left-10 bottom-6 md:bottom-10 max-w-[60%] text-white font-bold uppercase tracking-[0.04em] text-3xl sm:text-4xl lg:text-5xl leading-[1.1]"
+              className="absolute left-6 md:left-10 top-6 md:top-28 max-w-[70%] text-white font-bold uppercase tracking-[0.04em] text-3xl sm:text-4xl lg:text-5xl leading-[1.1]"
               style={{ fontFamily: 'Montserrat, sans-serif', textShadow: '0 2px 18px rgba(9,18,40,0.45)' }}
             >
               {slide.label}
