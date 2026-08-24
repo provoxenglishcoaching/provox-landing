@@ -22,11 +22,18 @@ import {
   updateSessionDateTime,
   togglePaymentReceived,
   completeContract,
+  getSessionById,
+  getSessions,
+  getScheduleSlots,
+  setSessionStatus,
+  insertMakeupSession,
+  deleteMakeupSessionsFor,
   newId,
   type AssignmentType,
+  type SessionStatus,
 } from '../lib/db';
 import { genCode, genPassword, hashPassword, verifyPassword } from '../lib/auth';
-import { generateInitialSessions, generateSessionsFrom, type ScheduleSlot } from '../lib/schedule';
+import { generateInitialSessions, generateSessionsFrom, addDays, type ScheduleSlot } from '../lib/schedule';
 import { requireCoach } from '../lib/session';
 import { validateFile, sanitizeFilename } from '../lib/upload';
 
@@ -263,6 +270,31 @@ export async function updateSession(sessionId: string, formData: FormData): Prom
   const time = String(formData.get('time') ?? '');
   if (!date || !TIME_RE.test(time)) return;
   await updateSessionDateTime(sessionId, date, time);
+  revalidatePath('/login/coach');
+  revalidatePath('/login/student');
+}
+
+// Marking a session "rescheduled" appends a makeup class at the end of the
+// contract, computed from the schedule pattern, linked back to the session
+// it makes up for. Un-marking it removes that makeup class (and, via the DB
+// cascade, any further makeup class chained off *that* one).
+export async function updateSessionStatus(sessionId: string, status: SessionStatus): Promise<void> {
+  await requireCoach();
+  const session = await getSessionById(sessionId);
+  if (!session) return;
+
+  if (status === 'rescheduled' && session.status !== 'rescheduled') {
+    const slotRows = await getScheduleSlots(session.contract_id);
+    const slots: ScheduleSlot[] = slotRows.map((s) => ({ dayOfWeek: s.day_of_week, timeOfDay: s.time_of_day }));
+    const allSessions = await getSessions(session.contract_id);
+    const last = allSessions[allSessions.length - 1];
+    const [makeup] = generateSessionsFrom(slots, addDays(last.session_date, 1), 1);
+    await insertMakeupSession(session.contract_id, makeup, last.sort_order + 1, sessionId);
+  } else if (status !== 'rescheduled' && session.status === 'rescheduled') {
+    await deleteMakeupSessionsFor(sessionId);
+  }
+
+  await setSessionStatus(sessionId, status);
   revalidatePath('/login/coach');
   revalidatePath('/login/student');
 }

@@ -18,6 +18,12 @@ function toDateOnlyString(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+export function addDays(iso: string, days: number): string {
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return toDateOnlyString(d);
+}
+
 function sortedSlots(slots: ScheduleSlot[]): ScheduleSlot[] {
   return [...slots].sort((a, b) => a.dayOfWeek - b.dayOfWeek || a.timeOfDay.localeCompare(b.timeOfDay));
 }

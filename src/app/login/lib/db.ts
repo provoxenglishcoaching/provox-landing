@@ -97,12 +97,16 @@ export interface ContractScheduleSlotRow {
   sort_order: number;
 }
 
+export type SessionStatus = 'scheduled' | 'completed' | 'rescheduled';
+
 export interface ContractSessionRow {
   id: string;
   contract_id: string;
   session_date: string;
   time_of_day: string;
   sort_order: number;
+  status: SessionStatus;
+  reschedule_source_id: string | null;
 }
 
 export function newId(prefix: string): string {
@@ -413,6 +417,36 @@ export async function updateContractDetails(id: string, weeklyClasses: number, m
 
 export async function updateSessionDateTime(id: string, date: string, time: string): Promise<void> {
   await sql`update contract_sessions set session_date = ${date}, time_of_day = ${time} where id = ${id}`;
+}
+
+export async function getSessionById(id: string): Promise<ContractSessionRow | undefined> {
+  const rows = await sql`select * from contract_sessions where id = ${id}` as ContractSessionRow[];
+  return rows[0] ? normalizeSession(rows[0]) : undefined;
+}
+
+export async function setSessionStatus(id: string, status: SessionStatus): Promise<void> {
+  await sql`update contract_sessions set status = ${status} where id = ${id}`;
+}
+
+// Inserts the makeup class created when a session is marked "rescheduled",
+// linking it back to the session it makes up for.
+export async function insertMakeupSession(
+  contractId: string,
+  session: GeneratedSession,
+  sortOrder: number,
+  sourceSessionId: string
+): Promise<void> {
+  await sql`
+    insert into contract_sessions (id, contract_id, session_date, time_of_day, sort_order, reschedule_source_id)
+    values (${newId('sess')}, ${contractId}, ${session.date}, ${session.time}, ${sortOrder}, ${sourceSessionId})
+  `;
+}
+
+// Removes the makeup class chained off a session when its "rescheduled"
+// status is undone. ON DELETE CASCADE on reschedule_source_id takes care of
+// any further makeup classes chained off that one in turn.
+export async function deleteMakeupSessionsFor(sourceSessionId: string): Promise<void> {
+  await sql`delete from contract_sessions where reschedule_source_id = ${sourceSessionId}`;
 }
 
 export async function togglePaymentReceived(id: string, received: boolean): Promise<void> {

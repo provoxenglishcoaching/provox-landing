@@ -54,13 +54,21 @@ create table if not exists contract_schedule_slots (
 );
 
 -- The actual generated (or manually edited) class dates for a contract.
+-- reschedule_source_id points back at the session this one was created to
+-- make up for (see status = 'rescheduled' below); cascades so deleting a
+-- session also removes any makeup chain hanging off it.
 create table if not exists contract_sessions (
   id text primary key,
   contract_id text not null references contracts(id) on delete cascade,
   session_date date not null,
   time_of_day text not null,
-  sort_order integer not null
+  sort_order integer not null,
+  status text not null default 'scheduled' check (status in ('scheduled', 'completed', 'rescheduled')),
+  reschedule_source_id text references contract_sessions(id) on delete cascade
 );
+
+alter table contract_sessions add column if not exists status text not null default 'scheduled' check (status in ('scheduled', 'completed', 'rescheduled'));
+alter table contract_sessions add column if not exists reschedule_source_id text references contract_sessions(id) on delete cascade;
 
 create index if not exists idx_contracts_student on contracts(student_id);
 create index if not exists idx_contract_schedule_slots_contract on contract_schedule_slots(contract_id);
