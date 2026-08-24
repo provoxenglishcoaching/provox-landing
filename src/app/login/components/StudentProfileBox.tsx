@@ -12,11 +12,13 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 export default function StudentProfileBox({
+  name,
   weeklyClasses,
   scheduleText,
   monthlyFee,
   studentSince,
 }: {
+  name: string;
   weeklyClasses: number | null;
   scheduleText: string;
   monthlyFee: string;
@@ -32,8 +34,11 @@ export default function StudentProfileBox({
         boxShadow: 'var(--portal-shadow-lg)',
       }}
     >
-      <div style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--portal-turq)', marginBottom: '16px' }}>
+      <div style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--portal-turq)', marginBottom: '8px' }}>
         Student Profile
+      </div>
+      <div style={{ fontFamily: 'var(--next-montserrat), sans-serif', fontWeight: 800, fontSize: '28px', color: '#fff', lineHeight: 1.25, marginBottom: '18px' }}>
+        {name}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '18px' }}>
         <Stat label="Weekly Classes" value={weeklyClasses ? String(weeklyClasses) : '—'} />

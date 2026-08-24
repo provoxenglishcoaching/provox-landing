@@ -151,6 +151,7 @@ export default async function CoachDashboard({
                 <CredentialsForm studentId={selected.id} firstName={selected.name.split(' ')[0]} code={selected.code} />
 
                 <StudentProfileBox
+                  name={selected.name}
                   weeklyClasses={activeContract?.weekly_classes ?? null}
                   scheduleText={scheduleText}
                   monthlyFee={activeContract?.monthly_fee ?? ''}

@@ -159,6 +159,7 @@ export default async function StudentDashboard() {
       </div>
 
       <StudentProfileBox
+        name={student.name}
         weeklyClasses={activeContract?.weekly_classes ?? null}
         scheduleText={scheduleText}
         monthlyFee={activeContract?.monthly_fee ?? ''}
