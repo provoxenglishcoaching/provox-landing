@@ -1,12 +1,25 @@
 import { redirect } from 'next/navigation';
 import { requireStudent } from '../lib/session';
-import { getStudentById, getAssignmentsForStudent, getSubmissionsForStudent } from '../lib/db';
+import {
+  getStudentById,
+  getAssignmentsForStudent,
+  getSubmissionsForStudent,
+  getActiveContract,
+  getScheduleSlots,
+  getSessions,
+  getCompletedContracts,
+} from '../lib/db';
 import { logout } from '../actions/auth';
 import { toggleAssignment } from '../actions/student';
+import { formatDateShort, formatScheduleText } from '../lib/schedule';
 import WaveProgress from '../components/WaveProgress';
 import AssignmentCard from '../components/AssignmentCard';
 import SubmissionForm from '../components/SubmissionForm';
 import SubmissionCard from '../components/SubmissionCard';
+import StudentProfileBox from '../components/StudentProfileBox';
+import PortalTabs from '../components/PortalTabs';
+import CurrentContractPanel from '../components/CurrentContractPanel';
+import CompletedContractsList from '../components/CompletedContractsList';
 
 export default async function StudentDashboard() {
   const session = await requireStudent();
@@ -14,28 +27,29 @@ export default async function StudentDashboard() {
   const student = await getStudentById(session.studentId);
   if (!student) redirect('/login/clear-session');
 
-  const [assignments, submissions] = await Promise.all([
+  const [assignments, submissions, activeContract, completedContracts] = await Promise.all([
     getAssignmentsForStudent(student.id),
     getSubmissionsForStudent(student.id),
+    getActiveContract(student.id),
+    getCompletedContracts(student.id),
   ]);
+
+  const [activeSlots, activeSessions, completedWithCounts] = await Promise.all([
+    activeContract ? getScheduleSlots(activeContract.id) : Promise.resolve([]),
+    activeContract ? getSessions(activeContract.id) : Promise.resolve([]),
+    Promise.all(
+      completedContracts.map(async (contract) => ({ contract, classCount: (await getSessions(contract.id)).length }))
+    ),
+  ]);
+
   const upcoming = assignments.filter((a) => a.status !== 'completed');
   const completed = assignments.filter((a) => a.status === 'completed');
   const pct = assignments.length ? Math.round((completed.length / assignments.length) * 100) : 0;
   const firstName = student.name.split(' ')[0];
+  const scheduleText = formatScheduleText(activeSlots.map((s) => ({ dayOfWeek: s.day_of_week, timeOfDay: s.time_of_day })));
 
-  return (
-    <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 24px 80px' }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-        <form action={logout}>
-          <button
-            type="submit"
-            style={{ background: 'transparent', border: '1px solid var(--portal-slate-200)', color: 'var(--portal-navy)', padding: '8px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
-          >
-            Sign out
-          </button>
-        </form>
-      </div>
-
+  const homeworkContent = (
+    <>
       <div
         style={{
           background: 'linear-gradient(135deg, var(--portal-navy) 0%, #223a63 100%)',
@@ -128,6 +142,36 @@ export default async function StudentDashboard() {
           </div>
         </>
       )}
+    </>
+  );
+
+  return (
+    <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 24px 80px' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+        <form action={logout}>
+          <button
+            type="submit"
+            style={{ background: 'transparent', border: '1px solid var(--portal-slate-200)', color: 'var(--portal-navy)', padding: '8px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+          >
+            Sign out
+          </button>
+        </form>
+      </div>
+
+      <StudentProfileBox
+        weeklyClasses={activeContract?.weekly_classes ?? null}
+        scheduleText={scheduleText}
+        monthlyFee={activeContract?.monthly_fee ?? ''}
+        studentSince={formatDateShort(student.added_date)}
+      />
+
+      <PortalTabs
+        tabs={[
+          { label: 'Current Contract', content: <CurrentContractPanel contract={activeContract} sessions={activeSessions} /> },
+          { label: 'Homework', content: homeworkContent },
+          { label: 'Completed Contracts', content: <CompletedContractsList contracts={completedWithCounts} /> },
+        ]}
+      />
     </main>
   );
 }

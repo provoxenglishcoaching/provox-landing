@@ -18,8 +18,53 @@ create table if not exists students (
   password_hash text not null,
   failed_attempts integer not null default 0,
   locked_until timestamptz,
-  added_date date not null default current_date
+  added_date date not null default current_date,
+  coach_notes text not null default ''
 );
+
+alter table students add column if not exists coach_notes text not null default '';
+
+-- One row per month-long block of classes. "active" is the block a student is
+-- currently in; a student has at most one active contract at a time. Past
+-- blocks are kept as "completed" for history.
+create table if not exists contracts (
+  id text primary key,
+  student_id text not null references students(id) on delete cascade,
+  contract_number integer not null,
+  name text not null,
+  weekly_classes integer not null check (weekly_classes > 0),
+  monthly_fee text not null default '',
+  status text not null default 'active' check (status in ('active', 'completed')),
+  payment_received boolean not null default false,
+  start_date date not null,
+  completed_date date,
+  created_at timestamptz not null default now(),
+  unique (student_id, contract_number)
+);
+
+-- The recurring weekly pattern (e.g. Tue 4pm / Thu 4pm / Sat 6pm) used to
+-- generate contract_sessions. Replaced wholesale whenever the coach edits
+-- the schedule.
+create table if not exists contract_schedule_slots (
+  id text primary key,
+  contract_id text not null references contracts(id) on delete cascade,
+  day_of_week integer not null check (day_of_week between 0 and 6),
+  time_of_day text not null,
+  sort_order integer not null
+);
+
+-- The actual generated (or manually edited) class dates for a contract.
+create table if not exists contract_sessions (
+  id text primary key,
+  contract_id text not null references contracts(id) on delete cascade,
+  session_date date not null,
+  time_of_day text not null,
+  sort_order integer not null
+);
+
+create index if not exists idx_contracts_student on contracts(student_id);
+create index if not exists idx_contract_schedule_slots_contract on contract_schedule_slots(contract_id);
+create index if not exists idx_contract_sessions_contract on contract_sessions(contract_id);
 
 create table if not exists assignments (
   id text primary key,

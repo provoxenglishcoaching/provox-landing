@@ -1,4 +1,5 @@
 import { neon, type NeonQueryFunction } from '@neondatabase/serverless';
+import type { ScheduleSlot, GeneratedSession } from './schedule';
 
 // Lazy: neon() validates the connection string at call time, and Next.js
 // evaluates this module while collecting page data even for dynamic routes.
@@ -32,6 +33,7 @@ export interface StudentRow {
   failed_attempts: number;
   locked_until: string | null;
   added_date: string;
+  coach_notes: string;
 }
 
 export type AssignmentType = 'Homework' | 'Material' | 'Resource';
@@ -71,6 +73,38 @@ export interface SubmissionRow {
   coach_feedback: string | null;
 }
 
+export type ContractStatus = 'active' | 'completed';
+
+export interface ContractRow {
+  id: string;
+  student_id: string;
+  contract_number: number;
+  name: string;
+  weekly_classes: number;
+  monthly_fee: string;
+  status: ContractStatus;
+  payment_received: boolean;
+  start_date: string;
+  completed_date: string | null;
+  created_at: string;
+}
+
+export interface ContractScheduleSlotRow {
+  id: string;
+  contract_id: string;
+  day_of_week: number;
+  time_of_day: string;
+  sort_order: number;
+}
+
+export interface ContractSessionRow {
+  id: string;
+  contract_id: string;
+  session_date: string;
+  time_of_day: string;
+  sort_order: number;
+}
+
 export function newId(prefix: string): string {
   return `${prefix}_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
 }
@@ -97,6 +131,20 @@ function toDateOnly(value: unknown): string | null {
 
 function normalizeStudent(row: StudentRow): StudentRow {
   return { ...row, added_date: toDateOnly(row.added_date)! };
+}
+
+function normalizeContract(row: ContractRow): ContractRow {
+  const createdAt = row.created_at as unknown;
+  return {
+    ...row,
+    start_date: toDateOnly(row.start_date)!,
+    completed_date: toDateOnly(row.completed_date),
+    created_at: createdAt instanceof Date ? createdAt.toISOString() : String(createdAt),
+  };
+}
+
+function normalizeSession(row: ContractSessionRow): ContractSessionRow {
+  return { ...row, session_date: toDateOnly(row.session_date)! };
 }
 
 function normalizeAssignment(row: AssignmentRow): AssignmentRow {
@@ -174,6 +222,10 @@ export async function updateStudentCredentials(id: string, code: string, passwor
   } else {
     await sql`update students set code = ${code} where id = ${id}`;
   }
+}
+
+export async function updateStudentNotes(id: string, notes: string): Promise<void> {
+  await sql`update students set coach_notes = ${notes} where id = ${id}`;
 }
 
 export async function getProgressByStudent(): Promise<Record<string, ProgressCount>> {
@@ -256,4 +308,121 @@ export async function getSubmissionById(id: string): Promise<SubmissionRow | und
 
 export async function setSubmissionFeedback(id: string, feedback: string): Promise<void> {
   await sql`update submissions set coach_feedback = ${feedback}, status = 'reviewed' where id = ${id}`;
+}
+
+export async function getActiveContract(studentId: string): Promise<ContractRow | undefined> {
+  const rows = await sql`
+    select * from contracts where student_id = ${studentId} and status = 'active'
+    order by contract_number desc limit 1
+  ` as ContractRow[];
+  return rows[0] ? normalizeContract(rows[0]) : undefined;
+}
+
+export async function getCompletedContracts(studentId: string): Promise<ContractRow[]> {
+  const rows = await sql`
+    select * from contracts where student_id = ${studentId} and status = 'completed'
+    order by contract_number desc
+  ` as ContractRow[];
+  return rows.map(normalizeContract);
+}
+
+export async function getContractById(id: string): Promise<ContractRow | undefined> {
+  const rows = await sql`select * from contracts where id = ${id}` as ContractRow[];
+  return rows[0] ? normalizeContract(rows[0]) : undefined;
+}
+
+export async function getScheduleSlots(contractId: string): Promise<ContractScheduleSlotRow[]> {
+  const rows = await sql`
+    select * from contract_schedule_slots where contract_id = ${contractId} order by sort_order asc
+  ` as ContractScheduleSlotRow[];
+  return rows;
+}
+
+export async function getSessions(contractId: string): Promise<ContractSessionRow[]> {
+  const rows = await sql`
+    select * from contract_sessions where contract_id = ${contractId} order by sort_order asc
+  ` as ContractSessionRow[];
+  return rows.map(normalizeSession);
+}
+
+// Creates the contract row plus its schedule slots and generated sessions.
+// Not wrapped in a transaction -- matches the rest of this file, which
+// accepts the same small inconsistency window on multi-insert operations
+// (see createAssignment's blob-then-row sequencing).
+export async function createContract(input: {
+  studentId: string;
+  studentFirstName: string;
+  weeklyClasses: number;
+  monthlyFee: string;
+  slots: ScheduleSlot[];
+  sessions: GeneratedSession[];
+}): Promise<ContractRow> {
+  const numberRows = await sql`
+    select coalesce(max(contract_number), 0) + 1 as next from contracts where student_id = ${input.studentId}
+  ` as { next: number }[];
+  const contractNumber = numberRows[0].next;
+  const name = `${input.studentFirstName}-${String(contractNumber).padStart(3, '0')}`;
+  const id = newId('con');
+  const startDate = input.sessions[0]?.date ?? new Date().toISOString().slice(0, 10);
+
+  const rows = await sql`
+    insert into contracts (id, student_id, contract_number, name, weekly_classes, monthly_fee, start_date)
+    values (${id}, ${input.studentId}, ${contractNumber}, ${name}, ${input.weeklyClasses}, ${input.monthlyFee}, ${startDate})
+    returning *
+  ` as ContractRow[];
+
+  await replaceScheduleSlots(id, input.slots);
+  await insertSessions(id, input.sessions, 0);
+
+  return normalizeContract(rows[0]);
+}
+
+export async function replaceScheduleSlots(contractId: string, slots: ScheduleSlot[]): Promise<void> {
+  await sql`delete from contract_schedule_slots where contract_id = ${contractId}`;
+  for (let i = 0; i < slots.length; i++) {
+    await sql`
+      insert into contract_schedule_slots (id, contract_id, day_of_week, time_of_day, sort_order)
+      values (${newId('slot')}, ${contractId}, ${slots[i].dayOfWeek}, ${slots[i].timeOfDay}, ${i})
+    `;
+  }
+}
+
+export async function insertSessions(contractId: string, sessions: GeneratedSession[], startSortOrder: number): Promise<void> {
+  for (let i = 0; i < sessions.length; i++) {
+    await sql`
+      insert into contract_sessions (id, contract_id, session_date, time_of_day, sort_order)
+      values (${newId('sess')}, ${contractId}, ${sessions[i].date}, ${sessions[i].time}, ${startSortOrder + i})
+    `;
+  }
+}
+
+export async function deleteSessionsFrom(contractId: string, fromDateInclusive: string): Promise<void> {
+  await sql`delete from contract_sessions where contract_id = ${contractId} and session_date >= ${fromDateInclusive}`;
+}
+
+export async function countSessionsBefore(contractId: string, beforeDateExclusive: string): Promise<number> {
+  const rows = await sql`
+    select count(*)::int as n from contract_sessions where contract_id = ${contractId} and session_date < ${beforeDateExclusive}
+  ` as { n: number }[];
+  return rows[0].n;
+}
+
+export async function updateContractDetails(id: string, weeklyClasses: number, monthlyFee: string): Promise<void> {
+  await sql`update contracts set weekly_classes = ${weeklyClasses}, monthly_fee = ${monthlyFee} where id = ${id}`;
+}
+
+export async function updateSessionDateTime(id: string, date: string, time: string): Promise<void> {
+  await sql`update contract_sessions set session_date = ${date}, time_of_day = ${time} where id = ${id}`;
+}
+
+export async function togglePaymentReceived(id: string, received: boolean): Promise<void> {
+  await sql`update contracts set payment_received = ${received} where id = ${id}`;
+}
+
+export async function completeContract(id: string): Promise<void> {
+  const rows = await sql`
+    select max(session_date) as last from contract_sessions where contract_id = ${id}
+  ` as { last: string | Date | null }[];
+  const completedDate = toDateOnly(rows[0]?.last) ?? new Date().toISOString().slice(0, 10);
+  await sql`update contracts set status = 'completed', completed_date = ${completedDate} where id = ${id}`;
 }

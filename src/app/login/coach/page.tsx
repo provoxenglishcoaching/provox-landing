@@ -1,8 +1,18 @@
 import Link from 'next/link';
 import { requireCoach } from '../lib/session';
-import { listStudents, getProgressByStudent, getAssignmentsForStudent, getSubmissionsForStudent } from '../lib/db';
+import {
+  listStudents,
+  getProgressByStudent,
+  getAssignmentsForStudent,
+  getSubmissionsForStudent,
+  getActiveContract,
+  getScheduleSlots,
+  getSessions,
+  getCompletedContracts,
+} from '../lib/db';
 import { logout } from '../actions/auth';
 import { removeStudent, removeAssignment } from '../actions/coach';
+import { formatDateShort, formatScheduleText } from '../lib/schedule';
 import WaveProgress from '../components/WaveProgress';
 import AssignmentCard from '../components/AssignmentCard';
 import AddStudentForm from '../components/AddStudentForm';
@@ -10,6 +20,11 @@ import CredentialsForm from '../components/CredentialsForm';
 import AssignForm from '../components/AssignForm';
 import SubmissionCard from '../components/SubmissionCard';
 import FeedbackForm from '../components/FeedbackForm';
+import StudentProfileBox from '../components/StudentProfileBox';
+import ContractSetupForm from '../components/ContractSetupForm';
+import ActiveContractPanel from '../components/ActiveContractPanel';
+import CompletedContractsList from '../components/CompletedContractsList';
+import CoachNotesForm from '../components/CoachNotesForm';
 
 export default async function CoachDashboard({
   searchParams,
@@ -21,10 +36,23 @@ export default async function CoachDashboard({
 
   const [students, progress] = await Promise.all([listStudents(), getProgressByStudent()]);
   const selected = selectedId ? students.find((s) => s.id === selectedId) : undefined;
-  const [assignments, submissions] = selected
-    ? await Promise.all([getAssignmentsForStudent(selected.id), getSubmissionsForStudent(selected.id)])
-    : [[], []];
+  const [assignments, submissions, activeContract, completedContracts] = selected
+    ? await Promise.all([
+        getAssignmentsForStudent(selected.id),
+        getSubmissionsForStudent(selected.id),
+        getActiveContract(selected.id),
+        getCompletedContracts(selected.id),
+      ])
+    : [[], [], undefined, []];
+  const [activeSlots, activeSessions, completedWithCounts] = await Promise.all([
+    activeContract ? getScheduleSlots(activeContract.id) : Promise.resolve([]),
+    activeContract ? getSessions(activeContract.id) : Promise.resolve([]),
+    Promise.all(
+      completedContracts.map(async (contract) => ({ contract, classCount: (await getSessions(contract.id)).length }))
+    ),
+  ]);
   const selectedProgress = selected ? progress[selected.id] ?? { total: 0, done: 0 } : { total: 0, done: 0 };
+  const scheduleText = formatScheduleText(activeSlots.map((s) => ({ dayOfWeek: s.day_of_week, timeOfDay: s.time_of_day })));
 
   return (
     <main style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 24px 80px' }}>
@@ -122,6 +150,21 @@ export default async function CoachDashboard({
 
                 <CredentialsForm studentId={selected.id} firstName={selected.name.split(' ')[0]} code={selected.code} />
 
+                <StudentProfileBox
+                  weeklyClasses={activeContract?.weekly_classes ?? null}
+                  scheduleText={scheduleText}
+                  monthlyFee={activeContract?.monthly_fee ?? ''}
+                  studentSince={formatDateShort(selected.added_date)}
+                />
+
+                {activeContract ? (
+                  <ActiveContractPanel contract={activeContract} sessions={activeSessions} slots={activeSlots.map((s) => ({ dayOfWeek: s.day_of_week, timeOfDay: s.time_of_day }))} />
+                ) : (
+                  <ContractSetupForm studentId={selected.id} firstName={selected.name.split(' ')[0]} isFirst={completedContracts.length === 0} />
+                )}
+
+                <CoachNotesForm studentId={selected.id} initialNotes={selected.coach_notes} />
+
                 <AssignForm studentId={selected.id} firstName={selected.name.split(' ')[0]} />
 
                 {assignments.length === 0 ? (
@@ -150,6 +193,11 @@ export default async function CoachDashboard({
                     />
                   ))
                 )}
+
+                <div style={{ fontSize: '11.5px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--portal-slate)', margin: '24px 0 10px' }}>
+                  Completed Contracts
+                </div>
+                <CompletedContractsList contracts={completedWithCounts} />
               </>
             )}
           </div>

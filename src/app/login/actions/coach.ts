@@ -7,15 +7,26 @@ import {
   deleteStudent,
   getStudentByCode,
   updateStudentCredentials,
+  updateStudentNotes,
   createAssignment,
   deleteAssignment,
   getSettings,
   updateMasterPasswordHash,
   setSubmissionFeedback,
+  createContract,
+  updateContractDetails,
+  replaceScheduleSlots,
+  countSessionsBefore,
+  deleteSessionsFrom,
+  insertSessions,
+  updateSessionDateTime,
+  togglePaymentReceived,
+  completeContract,
   newId,
   type AssignmentType,
 } from '../lib/db';
 import { genCode, genPassword, hashPassword, verifyPassword } from '../lib/auth';
+import { generateInitialSessions, generateSessionsFrom, type ScheduleSlot } from '../lib/schedule';
 import { requireCoach } from '../lib/session';
 import { validateFile, sanitizeFilename } from '../lib/upload';
 
@@ -151,4 +162,121 @@ export async function reviewSubmission(submissionId: string, formData: FormData)
   const feedback = String(formData.get('feedback') ?? '').trim();
   await setSubmissionFeedback(submissionId, feedback);
   revalidatePath('/login/coach');
+}
+
+export async function saveStudentNotes(studentId: string, formData: FormData): Promise<void> {
+  await requireCoach();
+  const notes = String(formData.get('notes') ?? '');
+  await updateStudentNotes(studentId, notes);
+  revalidatePath('/login/coach');
+}
+
+export interface ContractFormState {
+  error: string;
+}
+
+const TIME_RE = /^\d{2}:\d{2}$/;
+
+function parseSlotsFromForm(formData: FormData, count: number): ScheduleSlot[] | null {
+  const slots: ScheduleSlot[] = [];
+  for (let i = 0; i < count; i++) {
+    const dayNum = Number(formData.get(`day_${i}`));
+    const time = String(formData.get(`time_${i}`) ?? '');
+    if (!Number.isInteger(dayNum) || dayNum < 0 || dayNum > 6) return null;
+    if (!TIME_RE.test(time)) return null;
+    slots.push({ dayOfWeek: dayNum, timeOfDay: time });
+  }
+  return slots;
+}
+
+// Creates a student's first contract, or the next one after a prior contract
+// was completed. Requires a first-class date/time to anchor the generated
+// session dates (see updateContractSchedule for mid-contract edits, which
+// use today as the anchor instead).
+export async function createContractForStudent(
+  studentId: string,
+  studentFirstName: string,
+  _prevState: ContractFormState,
+  formData: FormData
+): Promise<ContractFormState> {
+  await requireCoach();
+
+  const weeklyClasses = Number(formData.get('weeklyClasses'));
+  if (!Number.isInteger(weeklyClasses) || weeklyClasses < 1 || weeklyClasses > 14) {
+    return { error: 'Weekly classes must be a whole number between 1 and 14.' };
+  }
+  const monthlyFee = String(formData.get('monthlyFee') ?? '').trim();
+  if (!monthlyFee) return { error: 'Enter a monthly fee.' };
+
+  const firstDate = String(formData.get('firstDate') ?? '');
+  const firstTime = String(formData.get('firstTime') ?? '');
+  if (!firstDate || !TIME_RE.test(firstTime)) return { error: 'Enter the date and time of the first class.' };
+
+  const slots = parseSlotsFromForm(formData, weeklyClasses);
+  if (!slots) return { error: 'Fill in a day and time for every weekly class.' };
+
+  const sessions = generateInitialSessions(slots, firstDate, firstTime, weeklyClasses * 4);
+  await createContract({ studentId, studentFirstName, weeklyClasses, monthlyFee, slots, sessions });
+  revalidatePath('/login/coach');
+  revalidatePath('/login/student');
+  return { error: '' };
+}
+
+// Edits an active contract's weekly class count, schedule, or fee. Sessions
+// that already happened are left untouched; everything from today onward is
+// regenerated against the new pattern (per Brad's call on mid-contract edits).
+export async function updateContractSchedule(
+  contractId: string,
+  _prevState: ContractFormState,
+  formData: FormData
+): Promise<ContractFormState> {
+  await requireCoach();
+
+  const weeklyClasses = Number(formData.get('weeklyClasses'));
+  if (!Number.isInteger(weeklyClasses) || weeklyClasses < 1 || weeklyClasses > 14) {
+    return { error: 'Weekly classes must be a whole number between 1 and 14.' };
+  }
+  const monthlyFee = String(formData.get('monthlyFee') ?? '').trim();
+  if (!monthlyFee) return { error: 'Enter a monthly fee.' };
+
+  const slots = parseSlotsFromForm(formData, weeklyClasses);
+  if (!slots) return { error: 'Fill in a day and time for every weekly class.' };
+
+  await updateContractDetails(contractId, weeklyClasses, monthlyFee);
+  await replaceScheduleSlots(contractId, slots);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const pastCount = await countSessionsBefore(contractId, today);
+  const neededFuture = Math.max(0, weeklyClasses * 4 - pastCount);
+  await deleteSessionsFrom(contractId, today);
+  const newSessions = generateSessionsFrom(slots, today, neededFuture);
+  await insertSessions(contractId, newSessions, pastCount);
+
+  revalidatePath('/login/coach');
+  revalidatePath('/login/student');
+  return { error: '' };
+}
+
+export async function updateSession(sessionId: string, formData: FormData): Promise<void> {
+  await requireCoach();
+  const date = String(formData.get('date') ?? '');
+  const time = String(formData.get('time') ?? '');
+  if (!date || !TIME_RE.test(time)) return;
+  await updateSessionDateTime(sessionId, date, time);
+  revalidatePath('/login/coach');
+  revalidatePath('/login/student');
+}
+
+export async function togglePayment(contractId: string, currentlyReceived: boolean): Promise<void> {
+  await requireCoach();
+  await togglePaymentReceived(contractId, !currentlyReceived);
+  revalidatePath('/login/coach');
+  revalidatePath('/login/student');
+}
+
+export async function finishContract(contractId: string): Promise<void> {
+  await requireCoach();
+  await completeContract(contractId);
+  revalidatePath('/login/coach');
+  revalidatePath('/login/student');
 }
