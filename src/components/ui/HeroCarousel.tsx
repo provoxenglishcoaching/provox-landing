@@ -114,25 +114,20 @@ export default function HeroCarousel() {
               style={{ objectPosition: slide.objectPosition }}
             />
 
-            {/* Scrims — a heavy one under the caption at the top, and a lighter
+            {/* Scrims — one down the left edge under the caption, and a lighter
                 one at the foot to hold the controls off the photo. */}
             <div
               aria-hidden="true"
               className="absolute inset-0"
               style={{
                 background:
-                  'linear-gradient(to bottom, rgba(9,18,40,0.80) 0%, rgba(9,18,40,0.38) 30%, rgba(9,18,40,0) 60%), ' +
+                  'linear-gradient(to right, rgba(9,18,40,0.74) 0%, rgba(9,18,40,0.36) 38%, rgba(9,18,40,0) 68%), ' +
                   'linear-gradient(to top, rgba(9,18,40,0.45) 0%, rgba(9,18,40,0) 22%)',
               }}
             />
 
-            {/*
-              Sits below the fixed 80px navbar on md+, where this panel runs up
-              behind it; on mobile the panel is below the copy, so it needs no
-              such clearance.
-            */}
             <figcaption
-              className="absolute left-6 md:left-10 top-6 md:top-28 max-w-[70%] text-white font-bold uppercase tracking-[0.04em] text-3xl sm:text-4xl lg:text-5xl leading-[1.1]"
+              className="absolute left-6 md:left-10 top-1/2 -translate-y-1/2 max-w-[70%] text-white font-bold uppercase tracking-[0.04em] text-3xl sm:text-4xl lg:text-5xl leading-[1.1]"
               style={{ fontFamily: 'Montserrat, sans-serif', textShadow: '0 2px 18px rgba(9,18,40,0.45)' }}
             >
               {slide.label}
