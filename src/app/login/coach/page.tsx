@@ -197,7 +197,15 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
         {!selected ? (
           <EmptyNote>Select a student on the left — or add your first one — to send materials and homework.</EmptyNote>
         ) : (
-          <>
+          /*
+            Keyed on the student so switching students remounts this whole
+            panel. Without it React reuses the mounted client components --
+            they sit at the same place in the tree with the same type -- and
+            their uncontrolled `defaultValue` inputs keep the previous
+            student's values while their bound server actions stay bound to
+            the previous student's id, so an edit saves against the wrong one.
+          */
+          <div key={selected.id}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '6px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <WaveProgress percent={selectedProgress.total ? Math.round((selectedProgress.done / selectedProgress.total) * 100) : 0} size={56} showLabel />
@@ -229,7 +237,11 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
             />
 
             {activeContract ? (
+              /* Keyed for the same reason as the panel above: completing one
+                 contract and starting the next must not leave the edit form
+                 bound to the finished contract. */
               <ActiveContractPanel
+                key={activeContract.id}
                 contract={activeContract}
                 sessions={activeSessions}
                 slots={activeSlots.map((s) => ({ dayOfWeek: s.day_of_week, timeOfDay: s.time_of_day }))}
@@ -263,7 +275,7 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
 
             <div style={sectionLabel}>Completed Contracts</div>
             <CompletedContractsList contracts={completedWithCounts} />
-          </>
+          </div>
         )}
       </Card>
     </div>
