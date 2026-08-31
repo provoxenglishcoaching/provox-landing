@@ -2,6 +2,7 @@
 
 import { useActionState, useRef, useEffect } from 'react';
 import { submitWork, type SubmitWorkState } from '../actions/student';
+import { MAX_FILE_SIZE_LABEL } from '../lib/upload';
 
 const initialState: SubmitWorkState = { error: '', success: false };
 
@@ -57,7 +58,7 @@ export default function SubmissionForm() {
           <label style={fieldLabel}>Attach a file (optional)</label>
           <input name="file" type="file" accept=".docx,.doc,.pdf,.png,.jpg,.jpeg" style={{ fontSize: '13px' }} />
           <div style={{ fontSize: '11.5px', color: 'var(--portal-slate)', marginTop: '4px' }}>
-            Word, PDF, or image — up to 25MB.
+            Word, PDF, or image — up to {MAX_FILE_SIZE_LABEL}.
           </div>
         </div>
         <button

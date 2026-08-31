@@ -323,6 +323,10 @@ export async function getSubmissionById(id: string): Promise<SubmissionRow | und
   return rows[0] ? normalizeSubmission(rows[0]) : undefined;
 }
 
+export async function deleteSubmission(id: string): Promise<void> {
+  await sql`delete from submissions where id = ${id}`;
+}
+
 export async function setSubmissionFeedback(id: string, feedback: string): Promise<void> {
   await sql`update submissions set coach_feedback = ${feedback}, status = 'reviewed' where id = ${id}`;
 }

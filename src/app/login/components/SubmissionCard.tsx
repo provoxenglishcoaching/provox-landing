@@ -1,4 +1,5 @@
 import type { SubmissionRow } from '../lib/db';
+import ConfirmDeleteButton from './ConfirmDeleteButton';
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -10,32 +11,43 @@ function formatDateTime(iso: string): string {
 export default function SubmissionCard({
   submission,
   feedbackSlot,
+  onDelete,
 }: {
   submission: SubmissionRow;
   /** Coach view: an editable feedback form. Student view: read-only feedback display (or nothing yet). */
   feedbackSlot?: React.ReactNode;
+  /** Coach view: bound server action deleting this submission and its file. */
+  onDelete?: () => Promise<void>;
 }) {
   const reviewed = submission.status === 'reviewed';
 
   return (
     <div style={{ border: '1px solid var(--portal-slate-200)', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '5px' }}>
-        <span style={{ fontWeight: 700, fontSize: '14.5px', color: 'var(--portal-navy)' }}>{submission.title}</span>
-        <span
-          style={{
-            display: 'inline-flex',
-            fontSize: '10.5px',
-            fontWeight: 800,
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-            padding: '4px 9px',
-            borderRadius: '20px',
-            background: reviewed ? 'var(--portal-ok)' : 'var(--portal-slate-200)',
-            color: reviewed ? '#fff' : 'var(--portal-navy)',
-          }}
-        >
-          {reviewed ? 'Reviewed' : 'Submitted'}
-        </span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '5px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span style={{ fontWeight: 700, fontSize: '14.5px', color: 'var(--portal-navy)' }}>{submission.title}</span>
+          <span
+            style={{
+              display: 'inline-flex',
+              fontSize: '10.5px',
+              fontWeight: 800,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              padding: '4px 9px',
+              borderRadius: '20px',
+              background: reviewed ? 'var(--portal-ok)' : 'var(--portal-slate-200)',
+              color: reviewed ? '#fff' : 'var(--portal-navy)',
+            }}
+          >
+            {reviewed ? 'Reviewed' : 'Submitted'}
+          </span>
+        </div>
+        {onDelete && (
+          <ConfirmDeleteButton
+            onConfirm={onDelete}
+            confirmLabel={submission.file_url ? 'Delete this and its file?' : 'Delete permanently?'}
+          />
+        )}
       </div>
       <div style={{ fontSize: '12px', color: 'var(--portal-slate)', marginBottom: '8px' }}>
         {formatDateTime(submission.date_submitted)}

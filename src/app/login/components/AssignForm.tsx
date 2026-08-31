@@ -2,6 +2,7 @@
 
 import { useActionState, useRef, useEffect } from 'react';
 import { addAssignment, type AddAssignmentState } from '../actions/coach';
+import { MAX_FILE_SIZE_LABEL } from '../lib/upload';
 
 const initialState: AddAssignmentState = { error: '' };
 
@@ -79,7 +80,7 @@ export default function AssignForm({ studentId, firstName }: { studentId: string
         <label style={fieldLabel}>Attach a file instead of a link (optional)</label>
         <input name="file" type="file" accept=".docx,.doc,.pdf,.png,.jpg,.jpeg" style={{ fontSize: '13px' }} />
         <div style={{ fontSize: '11.5px', color: 'var(--portal-slate)', marginTop: '4px' }}>
-          Word, PDF, or image — up to 25MB.
+          Word, PDF, or image — up to {MAX_FILE_SIZE_LABEL}.
         </div>
       </div>
       <button

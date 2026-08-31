@@ -16,7 +16,7 @@ import {
   countStudents,
 } from '../lib/db';
 import { logout } from '../actions/auth';
-import { removeStudent, removeAssignment, setStudentAvatar } from '../actions/coach';
+import { removeStudent, removeAssignment, removeSubmission, setStudentAvatar } from '../actions/coach';
 import { formatDateShort, formatScheduleText } from '../lib/schedule';
 import { contractFinancials, formatVnd, formatPercent } from '../lib/income';
 import WaveProgress from '../components/WaveProgress';
@@ -262,6 +262,7 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
                   key={s.id}
                   submission={s}
                   feedbackSlot={<FeedbackForm submissionId={s.id} initialFeedback={s.coach_feedback ?? ''} />}
+                  onDelete={removeSubmission.bind(null, s.id)}
                 />
               ))
             )}

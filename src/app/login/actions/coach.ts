@@ -1,6 +1,6 @@
 'use server';
 
-import { put } from '@vercel/blob';
+import { put, del } from '@vercel/blob';
 import { revalidatePath } from 'next/cache';
 import {
   createStudent,
@@ -14,6 +14,9 @@ import {
   getSettings,
   updateMasterPasswordHash,
   setSubmissionFeedback,
+  getSubmissionById,
+  deleteSubmission,
+  getAssignmentById,
   createContract,
   updateContractDetails,
   replaceScheduleSlots,
@@ -135,8 +138,12 @@ export async function addAssignment(
 
 export async function removeAssignment(assignmentId: string): Promise<void> {
   await requireCoach();
+  const assignment = await getAssignmentById(assignmentId);
+  // Its attachment goes too; nothing can reach the file once the row is gone.
+  await deleteStoredFile(assignment?.file_url ?? null);
   await deleteAssignment(assignmentId);
   revalidatePath('/login/coach');
+  revalidatePath('/login/student');
 }
 
 export interface ChangePasswordState {
@@ -164,6 +171,31 @@ export async function changeMasterPassword(
   const hash = await hashPassword(next);
   await updateMasterPasswordHash(hash);
   return { error: '', success: true };
+}
+
+/**
+ * Drops the stored file as well as the row -- leaving the blob behind would
+ * keep it in storage (and billable) forever, which is the point of deleting.
+ * Best-effort on the blob: if it is already gone the row should still go.
+ */
+async function deleteStoredFile(fileUrl: string | null): Promise<void> {
+  if (!fileUrl) return;
+  try {
+    await del(fileUrl);
+  } catch {
+    // Already removed, or storage is unreachable -- not worth blocking on.
+  }
+}
+
+export async function removeSubmission(submissionId: string): Promise<void> {
+  await requireCoach();
+  const submission = await getSubmissionById(submissionId);
+  if (!submission) return;
+
+  await deleteStoredFile(submission.file_url);
+  await deleteSubmission(submissionId);
+  revalidatePath('/login/coach');
+  revalidatePath('/login/student');
 }
 
 export async function reviewSubmission(submissionId: string, formData: FormData): Promise<void> {
