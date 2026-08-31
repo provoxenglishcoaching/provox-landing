@@ -70,9 +70,23 @@ create table if not exists contract_sessions (
 alter table contract_sessions add column if not exists status text not null default 'scheduled' check (status in ('scheduled', 'completed', 'rescheduled'));
 alter table contract_sessions add column if not exists reschedule_source_id text references contract_sessions(id) on delete cascade;
 
+-- How long one class runs, and the fee as a number the dashboard can do
+-- arithmetic on. monthly_fee stays as the display string; monthly_fee_amount
+-- is the source of truth for every income figure.
+alter table contracts add column if not exists class_duration_minutes integer not null default 60;
+alter table contracts add column if not exists monthly_fee_amount numeric(14,2) not null default 0;
+
+-- Backfills the numeric fee out of the free-text one written before that
+-- column existed ("6,000,000vnđ" -> 6000000). Scoped to rows still sitting at
+-- the default so it never clobbers a figure the coach has since corrected.
+update contracts
+   set monthly_fee_amount = coalesce(nullif(regexp_replace(monthly_fee, '[^0-9]', '', 'g'), '')::numeric, 0)
+ where monthly_fee_amount = 0;
+
 create index if not exists idx_contracts_student on contracts(student_id);
 create index if not exists idx_contract_schedule_slots_contract on contract_schedule_slots(contract_id);
 create index if not exists idx_contract_sessions_contract on contract_sessions(contract_id);
+create index if not exists idx_contract_sessions_status on contract_sessions(status);
 
 create table if not exists assignments (
   id text primary key,

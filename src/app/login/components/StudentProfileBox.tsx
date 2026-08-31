@@ -1,3 +1,5 @@
+import { formatDuration } from '../lib/income';
+
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -16,12 +18,14 @@ export default function StudentProfileBox({
   weeklyClasses,
   scheduleText,
   monthlyFee,
+  classDurationMinutes,
   studentSince,
 }: {
   name: string;
   weeklyClasses: number | null;
   scheduleText: string;
   monthlyFee: string;
+  classDurationMinutes: number | null;
   studentSince: string;
 }) {
   return (
@@ -42,6 +46,7 @@ export default function StudentProfileBox({
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '18px' }}>
         <Stat label="Weekly Classes" value={weeklyClasses ? String(weeklyClasses) : '—'} />
+        <Stat label="Class Time" value={classDurationMinutes ? formatDuration(classDurationMinutes) : '—'} />
         <Stat label="Class Schedule" value={scheduleText || '—'} />
         <Stat label="Monthly Fee" value={monthlyFee || '—'} />
         <Stat label="Student Since" value={studentSince} />

@@ -81,7 +81,10 @@ export interface ContractRow {
   contract_number: number;
   name: string;
   weekly_classes: number;
+  /** Display string. `monthly_fee_amount` is what the income maths uses. */
   monthly_fee: string;
+  monthly_fee_amount: number;
+  class_duration_minutes: number;
   status: ContractStatus;
   payment_received: boolean;
   start_date: string;
@@ -137,13 +140,16 @@ function normalizeStudent(row: StudentRow): StudentRow {
   return { ...row, added_date: toDateOnly(row.added_date)! };
 }
 
-function normalizeContract(row: ContractRow): ContractRow {
+function normalizeContract<T extends ContractRow>(row: T): T {
   const createdAt = row.created_at as unknown;
   return {
     ...row,
     start_date: toDateOnly(row.start_date)!,
     completed_date: toDateOnly(row.completed_date),
     created_at: createdAt instanceof Date ? createdAt.toISOString() : String(createdAt),
+    // Postgres `numeric` comes back off the driver as a string, and every
+    // income figure downstream does arithmetic on it.
+    monthly_fee_amount: Number(row.monthly_fee_amount ?? 0),
   };
 }
 
@@ -358,6 +364,8 @@ export async function createContract(input: {
   studentFirstName: string;
   weeklyClasses: number;
   monthlyFee: string;
+  monthlyFeeAmount: number;
+  classDurationMinutes: number;
   slots: ScheduleSlot[];
   sessions: GeneratedSession[];
 }): Promise<ContractRow> {
@@ -370,8 +378,14 @@ export async function createContract(input: {
   const startDate = input.sessions[0]?.date ?? new Date().toISOString().slice(0, 10);
 
   const rows = await sql`
-    insert into contracts (id, student_id, contract_number, name, weekly_classes, monthly_fee, start_date)
-    values (${id}, ${input.studentId}, ${contractNumber}, ${name}, ${input.weeklyClasses}, ${input.monthlyFee}, ${startDate})
+    insert into contracts (
+      id, student_id, contract_number, name, weekly_classes,
+      monthly_fee, monthly_fee_amount, class_duration_minutes, start_date
+    )
+    values (
+      ${id}, ${input.studentId}, ${contractNumber}, ${name}, ${input.weeklyClasses},
+      ${input.monthlyFee}, ${input.monthlyFeeAmount}, ${input.classDurationMinutes}, ${startDate}
+    )
     returning *
   ` as ContractRow[];
 
@@ -404,15 +418,22 @@ export async function deleteSessionsFrom(contractId: string, fromDateInclusive: 
   await sql`delete from contract_sessions where contract_id = ${contractId} and session_date >= ${fromDateInclusive}`;
 }
 
-export async function countSessionsBefore(contractId: string, beforeDateExclusive: string): Promise<number> {
-  const rows = await sql`
-    select count(*)::int as n from contract_sessions where contract_id = ${contractId} and session_date < ${beforeDateExclusive}
-  ` as { n: number }[];
-  return rows[0].n;
-}
 
-export async function updateContractDetails(id: string, weeklyClasses: number, monthlyFee: string): Promise<void> {
-  await sql`update contracts set weekly_classes = ${weeklyClasses}, monthly_fee = ${monthlyFee} where id = ${id}`;
+export async function updateContractDetails(
+  id: string,
+  weeklyClasses: number,
+  monthlyFee: string,
+  monthlyFeeAmount: number,
+  classDurationMinutes: number
+): Promise<void> {
+  await sql`
+    update contracts
+       set weekly_classes = ${weeklyClasses},
+           monthly_fee = ${monthlyFee},
+           monthly_fee_amount = ${monthlyFeeAmount},
+           class_duration_minutes = ${classDurationMinutes}
+     where id = ${id}
+  `;
 }
 
 export async function updateSessionDateTime(id: string, date: string, time: string): Promise<void> {
@@ -451,6 +472,92 @@ export async function deleteMakeupSessionsFor(sourceSessionId: string): Promise<
 
 export async function togglePaymentReceived(id: string, received: boolean): Promise<void> {
   await sql`update contracts set payment_received = ${received} where id = ${id}`;
+}
+
+export interface ContractWithCounts extends ContractRow {
+  student_name: string;
+  total_sessions: number;
+  completed_sessions: number;
+  rescheduled_sessions: number;
+  remaining_sessions: number;
+  last_session_date: string | null;
+}
+
+/** Every contract of a given status, with its session tallies rolled up. */
+export async function getContractsWithCounts(status: ContractStatus): Promise<ContractWithCounts[]> {
+  const rows = await sql`
+    select c.*,
+           s.name as student_name,
+           count(cs.id)::int as total_sessions,
+           count(cs.id) filter (where cs.status = 'completed')::int as completed_sessions,
+           count(cs.id) filter (where cs.status = 'rescheduled')::int as rescheduled_sessions,
+           count(cs.id) filter (where cs.status = 'scheduled')::int as remaining_sessions,
+           max(cs.session_date) as last_session_date
+      from contracts c
+      join students s on s.id = c.student_id
+      left join contract_sessions cs on cs.contract_id = c.id
+     where c.status = ${status}
+     group by c.id, s.name
+     order by s.name asc
+  ` as ContractWithCounts[];
+  return rows.map((row) => ({
+    ...normalizeContract(row),
+    last_session_date: toDateOnly(row.last_session_date),
+  }));
+}
+
+export interface MonthlyIncomeRow {
+  month: string;
+  classes_completed: number;
+  hours: number;
+  income: number;
+}
+
+/**
+ * Income recognised as classes are actually taught: each completed class
+ * earns its contract's fee divided by the classes that fee buys. A month in
+ * which reschedules pushed classes out therefore earns less, which is the
+ * whole point of tracking it this way.
+ */
+export async function getMonthlyIncome(): Promise<MonthlyIncomeRow[]> {
+  const rows = await sql`
+    select to_char(cs.session_date, 'YYYY-MM') as month,
+           count(*)::int as classes_completed,
+           sum(c.class_duration_minutes) / 60.0 as hours,
+           sum(c.monthly_fee_amount / greatest(c.weekly_classes * 4, 1)) as income
+      from contract_sessions cs
+      join contracts c on c.id = cs.contract_id
+     where cs.status = 'completed'
+     group by 1
+     order by 1 desc
+  ` as { month: string; classes_completed: number; hours: string; income: string }[];
+  return rows.map((r) => ({
+    month: r.month,
+    classes_completed: r.classes_completed,
+    hours: Number(r.hours),
+    income: Number(r.income),
+  }));
+}
+
+export interface SessionTotals {
+  total: number;
+  rescheduled: number;
+  completed: number;
+}
+
+export async function getSessionTotals(): Promise<SessionTotals> {
+  const rows = await sql`
+    select count(*)::int as total,
+           count(*) filter (where status = 'rescheduled')::int as rescheduled,
+           count(*) filter (where status = 'completed')::int as completed
+      from contract_sessions
+  ` as SessionTotals[];
+  return rows[0] ?? { total: 0, rescheduled: 0, completed: 0 };
+}
+
+export async function countStudents(): Promise<number> {
+  const rows = await sql`select count(*)::int as n from students` as { n: number }[];
+  return rows[0]?.n ?? 0;
 }
 
 export async function completeContract(id: string): Promise<void> {

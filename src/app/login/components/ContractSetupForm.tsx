@@ -49,9 +49,18 @@ export default function ContractSetupForm({
       )}
       <form action={formAction}>
         <ScheduleSlotFields />
-        <div style={{ marginBottom: '10px' }}>
-          <label style={fieldLabel}>Monthly fee</label>
-          <input name="monthlyFee" type="text" placeholder="e.g. 6,000,000 vnđ" required maxLength={40} style={fieldInput} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+          <div>
+            <label style={fieldLabel}>Monthly fee (vnđ)</label>
+            {/* step is measured from min, so min={1} would make 4000000 an
+                invalid value. Both are round thousands to keep every real
+                fee acceptable. */}
+            <input name="monthlyFee" type="number" min={1000} step={1000} placeholder="6000000" required style={fieldInput} />
+          </div>
+          <div>
+            <label style={fieldLabel}>Class length (minutes)</label>
+            <input name="classDuration" type="number" min={15} max={480} step={15} defaultValue={60} required style={fieldInput} />
+          </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
           <div>

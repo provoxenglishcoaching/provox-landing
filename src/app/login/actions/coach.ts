@@ -16,7 +16,6 @@ import {
   createContract,
   updateContractDetails,
   replaceScheduleSlots,
-  countSessionsBefore,
   deleteSessionsFrom,
   insertSessions,
   updateSessionDateTime,
@@ -34,6 +33,7 @@ import {
 } from '../lib/db';
 import { genCode, genPassword, hashPassword, verifyPassword } from '../lib/auth';
 import { generateInitialSessions, generateSessionsFrom, addDays, type ScheduleSlot } from '../lib/schedule';
+import { formatVnd } from '../lib/income';
 import { requireCoach } from '../lib/session';
 import { validateFile, sanitizeFilename } from '../lib/upload';
 
@@ -184,6 +184,32 @@ export interface ContractFormState {
 
 const TIME_RE = /^\d{2}:\d{2}$/;
 
+interface FeeAndDuration {
+  monthlyFee: string;
+  monthlyFeeAmount: number;
+  classDurationMinutes: number;
+}
+
+/**
+ * The fee is typed as a plain number of dong; the display string is derived
+ * from it so the two can never drift apart.
+ */
+function parseFeeAndDuration(formData: FormData): FeeAndDuration | string {
+  const feeAmount = Number(String(formData.get('monthlyFee') ?? '').replace(/[^0-9.]/g, ''));
+  if (!Number.isFinite(feeAmount) || feeAmount <= 0) return 'Enter the monthly fee as a number, e.g. 6000000.';
+
+  const duration = Number(formData.get('classDuration'));
+  if (!Number.isInteger(duration) || duration < 15 || duration > 480) {
+    return 'Class length must be between 15 and 480 minutes.';
+  }
+
+  return {
+    monthlyFee: formatVnd(feeAmount),
+    monthlyFeeAmount: feeAmount,
+    classDurationMinutes: duration,
+  };
+}
+
 function parseSlotsFromForm(formData: FormData, count: number): ScheduleSlot[] | null {
   const slots: ScheduleSlot[] = [];
   for (let i = 0; i < count; i++) {
@@ -212,8 +238,8 @@ export async function createContractForStudent(
   if (!Number.isInteger(weeklyClasses) || weeklyClasses < 1 || weeklyClasses > 14) {
     return { error: 'Weekly classes must be a whole number between 1 and 14.' };
   }
-  const monthlyFee = String(formData.get('monthlyFee') ?? '').trim();
-  if (!monthlyFee) return { error: 'Enter a monthly fee.' };
+  const money = parseFeeAndDuration(formData);
+  if (typeof money === 'string') return { error: money };
 
   const firstDate = String(formData.get('firstDate') ?? '');
   const firstTime = String(formData.get('firstTime') ?? '');
@@ -223,7 +249,7 @@ export async function createContractForStudent(
   if (!slots) return { error: 'Fill in a day and time for every weekly class.' };
 
   const sessions = generateInitialSessions(slots, firstDate, firstTime, weeklyClasses * 4);
-  await createContract({ studentId, studentFirstName, weeklyClasses, monthlyFee, slots, sessions });
+  await createContract({ studentId, studentFirstName, weeklyClasses, ...money, slots, sessions });
   revalidatePath('/login/coach');
   revalidatePath('/login/student');
   return { error: '' };
@@ -243,21 +269,33 @@ export async function updateContractSchedule(
   if (!Number.isInteger(weeklyClasses) || weeklyClasses < 1 || weeklyClasses > 14) {
     return { error: 'Weekly classes must be a whole number between 1 and 14.' };
   }
-  const monthlyFee = String(formData.get('monthlyFee') ?? '').trim();
-  if (!monthlyFee) return { error: 'Enter a monthly fee.' };
+  const money = parseFeeAndDuration(formData);
+  if (typeof money === 'string') return { error: money };
 
   const slots = parseSlotsFromForm(formData, weeklyClasses);
   if (!slots) return { error: 'Fill in a day and time for every weekly class.' };
 
-  await updateContractDetails(contractId, weeklyClasses, monthlyFee);
+  await updateContractDetails(
+    contractId,
+    weeklyClasses,
+    money.monthlyFee,
+    money.monthlyFeeAmount,
+    money.classDurationMinutes
+  );
   await replaceScheduleSlots(contractId, slots);
 
   const today = new Date().toISOString().slice(0, 10);
-  const pastCount = await countSessionsBefore(contractId, today);
-  const neededFuture = Math.max(0, weeklyClasses * 4 - pastCount);
+  const past = (await getSessions(contractId)).filter((s) => s.session_date < today);
+
+  // A contract owes its four weeks of classes *plus* one makeup for every
+  // class already rescheduled. Targeting the bare nominal count here would
+  // silently delete makeups the student is still owed.
+  const makeupsOwed = past.filter((s) => s.status === 'rescheduled').length;
+  const neededFuture = Math.max(0, weeklyClasses * 4 + makeupsOwed - past.length);
+
   await deleteSessionsFrom(contractId, today);
   const newSessions = generateSessionsFrom(slots, today, neededFuture);
-  await insertSessions(contractId, newSessions, pastCount);
+  await insertSessions(contractId, newSessions, past.length);
 
   revalidatePath('/login/coach');
   revalidatePath('/login/student');

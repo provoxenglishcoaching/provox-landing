@@ -163,6 +163,7 @@ export default async function StudentDashboard() {
         weeklyClasses={activeContract?.weekly_classes ?? null}
         scheduleText={scheduleText}
         monthlyFee={activeContract?.monthly_fee ?? ''}
+        classDurationMinutes={activeContract?.class_duration_minutes ?? null}
         studentSince={formatDateShort(student.added_date)}
       />
 

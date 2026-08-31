@@ -29,12 +29,14 @@ const fieldInput: React.CSSProperties = {
 export default function EditScheduleForm({
   contractId,
   weeklyClasses,
-  monthlyFee,
+  monthlyFeeAmount,
+  classDurationMinutes,
   slots,
 }: {
   contractId: string;
   weeklyClasses: number;
-  monthlyFee: string;
+  monthlyFeeAmount: number;
+  classDurationMinutes: number;
   slots: ScheduleSlot[];
 }) {
   const action = updateContractSchedule.bind(null, contractId);
@@ -56,9 +58,16 @@ export default function EditScheduleForm({
         )}
         <form action={formAction}>
           <ScheduleSlotFields defaultWeeklyClasses={weeklyClasses} defaultSlots={slots} />
-          <div style={{ marginBottom: '12px' }}>
-            <label style={fieldLabel}>Monthly fee</label>
-            <input name="monthlyFee" type="text" defaultValue={monthlyFee} required maxLength={40} style={fieldInput} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+            <div>
+              <label style={fieldLabel}>Monthly fee (vnđ)</label>
+              {/* step is measured from min -- see ContractSetupForm. */}
+              <input name="monthlyFee" type="number" min={1000} step={1000} defaultValue={monthlyFeeAmount} required style={fieldInput} />
+            </div>
+            <div>
+              <label style={fieldLabel}>Class length (minutes)</label>
+              <input name="classDuration" type="number" min={15} max={480} step={15} defaultValue={classDurationMinutes} required style={fieldInput} />
+            </div>
           </div>
           <button
             type="submit"

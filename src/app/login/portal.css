@@ -19,14 +19,161 @@
   color: var(--foreground);
 }
 
+/* ---- Coach dashboard ------------------------------------------------- */
+
+:root {
+  /* A soft wash of the brand navy, so the dashboard reads as ProVox rather
+     than as a generic pastel template. */
+  --dash-bg: #eeeffa;
+  --dash-panel: #f6f6fd;
+  --dash-card: #ffffff;
+  --dash-line: #e6e7f3;
+  --dash-ink: #2c3550;
+  --dash-muted: #7b86a3;
+  --dash-good-bg: #e2f5ea;
+  --dash-good-ink: #1f7a4d;
+  --dash-bad-bg: #fbe6e9;
+  --dash-bad-ink: #a83a51;
+  --dash-radius: 18px;
+}
+
+.dash-body {
+  min-height: 100vh;
+  background: var(--dash-bg);
+  color: var(--dash-ink);
+}
+
+.dash-shell {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 22px 20px 60px;
+}
+
+.dash-frame {
+  background: var(--dash-panel);
+  border-radius: 26px;
+  padding: 22px 26px 30px;
+  box-shadow: 0 18px 50px rgba(19, 40, 97, 0.09);
+}
+
+.dash-card {
+  background: var(--dash-card);
+  border: 1px solid var(--dash-line);
+  border-radius: var(--dash-radius);
+  box-shadow: 0 4px 18px rgba(19, 40, 97, 0.05);
+}
+
+.dash-tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: #ecedf8;
+  border-radius: 14px;
+  padding: 5px;
+}
+
+.dash-tab {
+  padding: 9px 22px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--dash-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dash-tab[data-active='true'] {
+  background: #fff;
+  color: var(--dash-ink);
+  box-shadow: 0 2px 8px rgba(19, 40, 97, 0.10);
+}
+
+/* Stat strip: values sit straight on the panel, split by hairline rules. */
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: 22px 0 24px;
+}
+
+.dash-stat {
+  padding: 4px 20px;
+  border-left: 1px solid var(--dash-line);
+}
+
+.dash-stat:first-child {
+  border-left: none;
+  padding-left: 4px;
+}
+
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.dash-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--dash-muted);
+  font-size: 12.5px;
+  padding: 0 12px 12px;
+  border-bottom: 1px solid var(--dash-line);
+}
+
+.dash-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--dash-line);
+  color: var(--dash-ink);
+}
+
+.dash-table tr:last-child td {
+  border-bottom: none;
+}
+
+.dash-table th:first-child,
+.dash-table td:first-child {
+  padding-left: 2px;
+}
+
+.dash-num {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  .dash-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 0;
+  }
+  .dash-stat:nth-child(3) {
+    border-left: none;
+    padding-left: 4px;
+  }
+  .dash-frame {
+    padding: 18px 14px 24px;
+  }
+}
+
+@media (max-width: 560px) {
+  .dash-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dash-stat {
+    border-left: none;
+    padding-left: 4px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .portal-wave-anim {
     animation: none !important;
   }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
+  /* minmax(0, 1fr) rather than 1fr: a bare 1fr keeps an `auto` minimum, so a
+     wide table inside refuses to shrink and pushes the grid past the
+     viewport instead of scrolling within its own card. */
   .portal-coach-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }

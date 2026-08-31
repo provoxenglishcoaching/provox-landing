@@ -49,7 +49,13 @@ export default function ActiveContractPanel({
 
       <SessionsList sessions={sessions} editable />
 
-      <EditScheduleForm contractId={contract.id} weeklyClasses={contract.weekly_classes} monthlyFee={contract.monthly_fee} slots={slots} />
+      <EditScheduleForm
+        contractId={contract.id}
+        weeklyClasses={contract.weekly_classes}
+        monthlyFeeAmount={contract.monthly_fee_amount}
+        classDurationMinutes={contract.class_duration_minutes}
+        slots={slots}
+      />
     </div>
   );
 }
