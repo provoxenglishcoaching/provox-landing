@@ -22,9 +22,9 @@
 /* ---- Coach dashboard ------------------------------------------------- */
 
 :root {
-  /* A soft wash of the brand navy, so the dashboard reads as ProVox rather
-     than as a generic pastel template. */
-  --dash-bg: #eeeffa;
+  /* Neutral grey surround, so the light panel reads as a card floating on
+     the page. */
+  --dash-bg: #b4b4b4;
   --dash-panel: #f6f6fd;
   --dash-card: #ffffff;
   --dash-line: #e6e7f3;
@@ -41,6 +41,13 @@
   min-height: 100vh;
   background: var(--dash-bg);
   color: var(--dash-ink);
+}
+
+/* The shared portal layout paints <body> off-white for the student pages.
+   On the dashboard that shows through when the page is overscrolled, so
+   carry the grey up to the body wherever the dashboard is on screen. */
+body:has(.dash-body) {
+  background: var(--dash-bg);
 }
 
 .dash-shell {

@@ -1,5 +1,6 @@
 import { neon, type NeonQueryFunction } from '@neondatabase/serverless';
 import type { ScheduleSlot, GeneratedSession } from './schedule';
+import { INCOME_TRACKING_START } from './income';
 
 // Lazy: neon() validates the connection string at call time, and Next.js
 // evaluates this module while collecting page data even for dynamic routes.
@@ -514,10 +515,12 @@ export interface MonthlyIncomeRow {
 }
 
 /**
- * Income recognised as classes are actually taught: each completed class
- * earns its contract's fee divided by the classes that fee buys. A month in
- * which reschedules pushed classes out therefore earns less, which is the
- * whole point of tracking it this way.
+ * Money actually banked, month by month: a class counts only once it has
+ * been taught *and* its contract is marked paid. Each such class earns its
+ * contract's fee divided by the classes that fee buys, so a month in which
+ * reschedules pushed classes out earns less -- the whole point of tracking
+ * it this way. Unpaid contracts contribute nothing until the payment is
+ * ticked, at which point their taught classes appear.
  */
 export async function getMonthlyIncome(): Promise<MonthlyIncomeRow[]> {
   const rows = await sql`
@@ -528,6 +531,8 @@ export async function getMonthlyIncome(): Promise<MonthlyIncomeRow[]> {
       from contract_sessions cs
       join contracts c on c.id = cs.contract_id
      where cs.status = 'completed'
+       and c.payment_received = true
+       and cs.session_date >= ${INCOME_TRACKING_START}
      group by 1
      order by 1 desc
   ` as { month: string; classes_completed: number; hours: string; income: string }[];

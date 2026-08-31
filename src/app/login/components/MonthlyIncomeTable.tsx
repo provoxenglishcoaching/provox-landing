@@ -4,7 +4,12 @@ import { EmptyNote } from './DashUI';
 
 export default function MonthlyIncomeTable({ rows }: { rows: MonthlyIncomeRow[] }) {
   if (rows.length === 0) {
-    return <EmptyNote>No classes marked complete yet — months appear here as you tick classes off.</EmptyNote>;
+    return (
+      <EmptyNote>
+        Nothing banked yet. A month appears once its classes are ticked complete and the
+        contract is marked paid.
+      </EmptyNote>
+    );
   }
 
   const peak = Math.max(...rows.map((r) => r.income), 1);
@@ -17,7 +22,7 @@ export default function MonthlyIncomeTable({ rows }: { rows: MonthlyIncomeRow[] 
             <th>Month</th>
             <th>Classes</th>
             <th>Hours</th>
-            <th style={{ textAlign: 'right' }}>Earned</th>
+            <th style={{ textAlign: 'right' }}>Paid income</th>
             <th style={{ width: '28%' }}></th>
           </tr>
         </thead>

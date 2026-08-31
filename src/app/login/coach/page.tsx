@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import WaveMark from '@/components/ui/WaveMark';
+import Image from 'next/image';
 import { requireCoach } from '../lib/session';
 import {
   listStudents,
@@ -103,20 +103,20 @@ async function OverviewTab() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.35fr) minmax(0, 1fr)', gap: '18px', alignItems: 'start' }} className="portal-coach-grid">
-        <Card title="Monthly Income Tracker">
-          <MonthlyIncomeTable rows={monthly} />
-        </Card>
-
         {/* Explicit minmax(0, 1fr): the implicit `auto` track would size to
             the widest table inside and overflow this column on narrow screens. */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '18px' }}>
-          <Card title="Effective Hourly Rate">
-            <HourlyRateTable contracts={activeContracts} />
+          <Card title="Monthly Income Tracker">
+            <MonthlyIncomeTable rows={monthly} />
           </Card>
           <Card title="Contracts Finishing Soon">
             <FinishingSoonTable contracts={activeContracts} />
           </Card>
         </div>
+
+        <Card title="Effective Hourly Rate">
+          <HourlyRateTable contracts={activeContracts} />
+        </Card>
       </div>
     </>
   );
@@ -179,8 +179,7 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
                 <WaveProgress percent={pct} size={38} />
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--dash-ink)' }}>{s.name}</div>
-                  <div style={{ fontSize: '11.5px', color: 'var(--dash-muted)', marginTop: '1px' }}>
-                    {p.done}/{p.total} complete ·{' '}
+                  <div style={{ marginTop: '3px' }}>
                     <span style={{ fontFamily: 'var(--next-montserrat), sans-serif', fontWeight: 800, background: 'var(--portal-navy)', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '11.5px', letterSpacing: '0.04em' }}>
                       {s.code}
                     </span>
@@ -296,11 +295,16 @@ export default async function CoachDashboard({
       <div className="dash-shell">
         <div className="dash-frame">
           <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '18px' }}>
-            <Link href="/login/coach" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-              <WaveMark className="h-7 w-auto" />
-              <span style={{ fontFamily: 'var(--next-montserrat), sans-serif', fontWeight: 800, fontSize: '18px', color: 'var(--dash-ink)' }}>
-                ProVox
-              </span>
+            <Link href="/login/coach" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+              {/* The same full lockup the student sign-in screen uses. */}
+              <Image
+                src="/logo-light.svg"
+                alt="ProVox — Professional English Coaching"
+                width={425}
+                height={345}
+                priority
+                style={{ width: '104px', height: 'auto' }}
+              />
             </Link>
 
             <Tabs active={activeTab} />

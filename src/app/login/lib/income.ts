@@ -10,6 +10,13 @@
 /** A contract is sold as four weeks of classes. */
 export const WEEKS_PER_CONTRACT = 4;
 
+/**
+ * The monthly tracker starts here. Classes before this date predate the
+ * portal holding complete records, so counting them would understate those
+ * months and make the history misleading.
+ */
+export const INCOME_TRACKING_START = '2026-09-01';
+
 export interface ContractInput {
   feeAmount: number;
   weeklyClasses: number;
