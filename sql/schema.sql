@@ -24,6 +24,10 @@ create table if not exists students (
 
 alter table students add column if not exists coach_notes text not null default '';
 
+-- Id of a file in public/avatars (no extension). Empty means "not chosen
+-- yet", which renders as a neutral placeholder.
+alter table students add column if not exists avatar text not null default '';
+
 -- One row per month-long block of classes. "active" is the block a student is
 -- currently in; a student has at most one active contract at a time. Past
 -- blocks are kept as "completed" for history.

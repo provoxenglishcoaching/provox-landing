@@ -16,7 +16,7 @@ import {
   countStudents,
 } from '../lib/db';
 import { logout } from '../actions/auth';
-import { removeStudent, removeAssignment } from '../actions/coach';
+import { removeStudent, removeAssignment, setStudentAvatar } from '../actions/coach';
 import { formatDateShort, formatScheduleText } from '../lib/schedule';
 import { contractFinancials, formatVnd, formatPercent } from '../lib/income';
 import WaveProgress from '../components/WaveProgress';
@@ -31,6 +31,8 @@ import ContractSetupForm from '../components/ContractSetupForm';
 import ActiveContractPanel from '../components/ActiveContractPanel';
 import CompletedContractsList from '../components/CompletedContractsList';
 import CoachNotesForm from '../components/CoachNotesForm';
+import Avatar from '../components/Avatar';
+import AvatarPicker from '../components/AvatarPicker';
 import MonthlyIncomeTable from '../components/MonthlyIncomeTable';
 import HourlyRateTable from '../components/HourlyRateTable';
 import FinishingSoonTable from '../components/FinishingSoonTable';
@@ -157,8 +159,6 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
         <div style={{ padding: '16px 18px' }}>
           {students.length === 0 && <EmptyNote>No students enrolled yet.</EmptyNote>}
           {students.map((s) => {
-            const p = progress[s.id] ?? { total: 0, done: 0 };
-            const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
             const active = s.id === selected?.id;
             return (
               <Link
@@ -176,15 +176,8 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
                   border: `1px solid ${active ? 'var(--portal-turq)' : 'transparent'}`,
                 }}
               >
-                <WaveProgress percent={pct} size={38} />
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--dash-ink)' }}>{s.name}</div>
-                  <div style={{ marginTop: '3px' }}>
-                    <span style={{ fontFamily: 'var(--next-montserrat), sans-serif', fontWeight: 800, background: 'var(--portal-navy)', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '11.5px', letterSpacing: '0.04em' }}>
-                      {s.code}
-                    </span>
-                  </div>
-                </div>
+                <Avatar avatar={s.avatar} name={s.name} size={38} />
+                <div style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--dash-ink)' }}>{s.name}</div>
               </Link>
             );
           })}
@@ -224,10 +217,17 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
               </form>
             </div>
 
+            <AvatarPicker
+              current={selected.avatar}
+              name={selected.name.split(' ')[0]}
+              onSelect={setStudentAvatar.bind(null, selected.id)}
+            />
+
             <CredentialsForm studentId={selected.id} firstName={selected.name.split(' ')[0]} code={selected.code} />
 
             <StudentProfileBox
               name={selected.name}
+              avatar={selected.avatar}
               weeklyClasses={activeContract?.weekly_classes ?? null}
               scheduleText={scheduleText}
               monthlyFee={activeContract?.monthly_fee ?? ''}

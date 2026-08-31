@@ -35,6 +35,8 @@ export interface StudentRow {
   locked_until: string | null;
   added_date: string;
   coach_notes: string;
+  /** Id of a file in public/avatars; empty until one is chosen. */
+  avatar: string;
 }
 
 export type AssignmentType = 'Homework' | 'Material' | 'Resource';
@@ -237,6 +239,10 @@ export async function updateStudentCredentials(id: string, code: string, passwor
 
 export async function updateStudentNotes(id: string, notes: string): Promise<void> {
   await sql`update students set coach_notes = ${notes} where id = ${id}`;
+}
+
+export async function updateStudentAvatar(id: string, avatar: string): Promise<void> {
+  await sql`update students set avatar = ${avatar} where id = ${id}`;
 }
 
 export async function getProgressByStudent(): Promise<Record<string, ProgressCount>> {

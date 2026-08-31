@@ -1,4 +1,5 @@
 import { formatDuration } from '../lib/income';
+import Avatar from './Avatar';
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -15,6 +16,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 export default function StudentProfileBox({
   name,
+  avatar,
   weeklyClasses,
   scheduleText,
   monthlyFee,
@@ -22,6 +24,7 @@ export default function StudentProfileBox({
   studentSince,
 }: {
   name: string;
+  avatar: string;
   weeklyClasses: number | null;
   scheduleText: string;
   monthlyFee: string;
@@ -41,8 +44,11 @@ export default function StudentProfileBox({
       <div style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--portal-turq)', marginBottom: '8px' }}>
         Student Profile
       </div>
-      <div style={{ fontFamily: 'var(--next-montserrat), sans-serif', fontWeight: 800, fontSize: '28px', color: '#fff', lineHeight: 1.25, marginBottom: '18px' }}>
-        {name}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '18px' }}>
+        <Avatar avatar={avatar} name={name} size={54} />
+        <div style={{ fontFamily: 'var(--next-montserrat), sans-serif', fontWeight: 800, fontSize: '28px', color: '#fff', lineHeight: 1.25 }}>
+          {name}
+        </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '18px' }}>
         <Stat label="Weekly Classes" value={weeklyClasses ? String(weeklyClasses) : '—'} />

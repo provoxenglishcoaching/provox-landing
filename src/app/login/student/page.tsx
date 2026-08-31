@@ -10,7 +10,7 @@ import {
   getCompletedContracts,
 } from '../lib/db';
 import { logout } from '../actions/auth';
-import { toggleAssignment } from '../actions/student';
+import { toggleAssignment, changeMyAvatar } from '../actions/student';
 import { formatDateShort, formatScheduleText } from '../lib/schedule';
 import WaveProgress from '../components/WaveProgress';
 import AssignmentCard from '../components/AssignmentCard';
@@ -20,6 +20,7 @@ import StudentProfileBox from '../components/StudentProfileBox';
 import PortalTabs from '../components/PortalTabs';
 import CurrentContractPanel from '../components/CurrentContractPanel';
 import CompletedContractsList from '../components/CompletedContractsList';
+import AvatarPicker from '../components/AvatarPicker';
 
 export default async function StudentDashboard() {
   const session = await requireStudent();
@@ -160,11 +161,20 @@ export default async function StudentDashboard() {
 
       <StudentProfileBox
         name={student.name}
+        avatar={student.avatar}
         weeklyClasses={activeContract?.weekly_classes ?? null}
         scheduleText={scheduleText}
         monthlyFee={activeContract?.monthly_fee ?? ''}
         classDurationMinutes={activeContract?.class_duration_minutes ?? null}
         studentSince={formatDateShort(student.added_date)}
+      />
+
+      <AvatarPicker
+        current={student.avatar}
+        name={firstName}
+        onSelect={changeMyAvatar}
+        label="Your profile icon"
+        hint="Pick the icon that shows on your profile. You can change it whenever you like."
       />
 
       <PortalTabs

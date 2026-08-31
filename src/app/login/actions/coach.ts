@@ -8,6 +8,7 @@ import {
   getStudentByCode,
   updateStudentCredentials,
   updateStudentNotes,
+  updateStudentAvatar,
   createAssignment,
   deleteAssignment,
   getSettings,
@@ -34,6 +35,7 @@ import {
 import { genCode, genPassword, hashPassword, verifyPassword } from '../lib/auth';
 import { generateInitialSessions, generateSessionsFrom, addDays, type ScheduleSlot } from '../lib/schedule';
 import { formatVnd } from '../lib/income';
+import { isValidAvatar } from '../lib/avatars';
 import { requireCoach } from '../lib/session';
 import { validateFile, sanitizeFilename } from '../lib/upload';
 
@@ -169,6 +171,15 @@ export async function reviewSubmission(submissionId: string, formData: FormData)
   const feedback = String(formData.get('feedback') ?? '').trim();
   await setSubmissionFeedback(submissionId, feedback);
   revalidatePath('/login/coach');
+}
+
+export async function setStudentAvatar(studentId: string, avatar: string): Promise<void> {
+  await requireCoach();
+  // Validated against the known set, never trusted straight into an <img src>.
+  if (avatar !== '' && !isValidAvatar(avatar)) return;
+  await updateStudentAvatar(studentId, avatar);
+  revalidatePath('/login/coach');
+  revalidatePath('/login/student');
 }
 
 export async function saveStudentNotes(studentId: string, formData: FormData): Promise<void> {
