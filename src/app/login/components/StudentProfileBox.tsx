@@ -1,5 +1,6 @@
 import { formatDuration } from '../lib/income';
 import Avatar from './Avatar';
+import EditableAvatar from './EditableAvatar';
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -22,6 +23,7 @@ export default function StudentProfileBox({
   monthlyFee,
   classDurationMinutes,
   studentSince,
+  onSelectAvatar,
 }: {
   name: string;
   avatar: string;
@@ -30,6 +32,8 @@ export default function StudentProfileBox({
   monthlyFee: string;
   classDurationMinutes: number | null;
   studentSince: string;
+  /** Bound server action. Given one, the avatar gets a pencil badge. */
+  onSelectAvatar?: (avatar: string) => Promise<void>;
 }) {
   return (
     <div
@@ -45,7 +49,11 @@ export default function StudentProfileBox({
         Student Profile
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '18px' }}>
-        <Avatar avatar={avatar} name={name} size={54} />
+        {onSelectAvatar ? (
+          <EditableAvatar avatar={avatar} name={name} size={54} onSelect={onSelectAvatar} />
+        ) : (
+          <Avatar avatar={avatar} name={name} size={54} />
+        )}
         <div style={{ fontFamily: 'var(--next-montserrat), sans-serif', fontWeight: 800, fontSize: '28px', color: '#fff', lineHeight: 1.25 }}>
           {name}
         </div>

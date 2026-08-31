@@ -32,7 +32,6 @@ import ActiveContractPanel from '../components/ActiveContractPanel';
 import CompletedContractsList from '../components/CompletedContractsList';
 import CoachNotesForm from '../components/CoachNotesForm';
 import Avatar from '../components/Avatar';
-import AvatarPicker from '../components/AvatarPicker';
 import MonthlyIncomeTable from '../components/MonthlyIncomeTable';
 import HourlyRateTable from '../components/HourlyRateTable';
 import FinishingSoonTable from '../components/FinishingSoonTable';
@@ -217,12 +216,6 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
               </form>
             </div>
 
-            <AvatarPicker
-              current={selected.avatar}
-              name={selected.name.split(' ')[0]}
-              onSelect={setStudentAvatar.bind(null, selected.id)}
-            />
-
             <CredentialsForm studentId={selected.id} firstName={selected.name.split(' ')[0]} code={selected.code} />
 
             <StudentProfileBox
@@ -233,6 +226,7 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
               monthlyFee={activeContract?.monthly_fee ?? ''}
               classDurationMinutes={activeContract?.class_duration_minutes ?? null}
               studentSince={formatDateShort(selected.added_date)}
+              onSelectAvatar={setStudentAvatar.bind(null, selected.id)}
             />
 
             {activeContract ? (
