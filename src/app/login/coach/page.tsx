@@ -14,6 +14,10 @@ import {
   getMonthlyIncome,
   getSessionTotals,
   countStudents,
+  getLibraryDecks,
+  getCardsForDeck,
+  getDeckRecipients,
+  getDecksForStudent,
 } from '../lib/db';
 import { logout } from '../actions/auth';
 import { removeStudent, removeAssignment, removeSubmission, setStudentAvatar } from '../actions/coach';
@@ -35,7 +39,8 @@ import Avatar from '../components/Avatar';
 import MonthlyIncomeTable from '../components/MonthlyIncomeTable';
 import HourlyRateTable from '../components/HourlyRateTable';
 import FinishingSoonTable from '../components/FinishingSoonTable';
-import { Card, Stat, Tabs, EmptyNote } from '../components/DashUI';
+import LibraryDecks from '../components/LibraryDecks';
+import { Card, Stat, Tabs, EmptyNote, COACH_TABS } from '../components/DashUI';
 
 const sectionLabel: React.CSSProperties = {
   fontSize: '11.5px',
@@ -119,7 +124,39 @@ async function OverviewTab() {
           <HourlyRateTable contracts={activeContracts} />
         </Card>
       </div>
+
+      <div style={{ marginTop: '18px' }}>
+        <Card title="Flashcard Library">
+          <LibraryCard />
+        </Card>
+      </div>
     </>
+  );
+}
+
+/**
+ * The master decks, with their cards and the students already holding a copy.
+ * A library is a handful of decks, so loading their cards up front is cheaper
+ * than a round trip each time one is expanded.
+ */
+async function LibraryCard() {
+  const [decks, students] = await Promise.all([getLibraryDecks(), listStudents()]);
+
+  const loaded = await Promise.all(
+    decks.map(async (deck) => ({
+      id: deck.id,
+      cards: await getCardsForDeck(deck.id),
+      recipients: await getDeckRecipients(deck.id),
+    }))
+  );
+
+  return (
+    <LibraryDecks
+      decks={decks}
+      cardsByDeck={Object.fromEntries(loaded.map((d) => [d.id, d.cards]))}
+      recipientsByDeck={Object.fromEntries(loaded.map((d) => [d.id, d.recipients]))}
+      students={students.map((s) => ({ id: s.id, name: s.name }))}
+    />
   );
 }
 
@@ -127,14 +164,15 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
   const [students, progress] = await Promise.all([listStudents(), getProgressByStudent()]);
   const selected = selectedId ? students.find((s) => s.id === selectedId) : undefined;
 
-  const [assignments, submissions, activeContract, completedContracts] = selected
+  const [assignments, submissions, activeContract, completedContracts, decks] = selected
     ? await Promise.all([
         getAssignmentsForStudent(selected.id),
         getSubmissionsForStudent(selected.id),
         getActiveContract(selected.id),
         getCompletedContracts(selected.id),
+        getDecksForStudent(selected.id),
       ])
-    : [[], [], undefined, []];
+    : [[], [], undefined, [], []];
 
   const [activeSlots, activeSessions, completedWithCounts] = await Promise.all([
     activeContract ? getScheduleSlots(activeContract.id) : Promise.resolve([]),
@@ -267,6 +305,29 @@ async function StudentsTab({ selectedId }: { selectedId?: string }) {
               ))
             )}
 
+            <div style={sectionLabel}>Flashcards</div>
+            {decks.length === 0 ? (
+              <EmptyNote>
+                No decks yet. Send one from the Flashcard Library on the Overview tab.
+              </EmptyNote>
+            ) : (
+              <div style={{ display: 'grid', gap: '6px' }}>
+                {decks.map((deck) => (
+                  <div key={deck.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', padding: '10px 12px', border: '1px solid var(--dash-line)', borderRadius: '10px', fontSize: '13px' }}>
+                    <span style={{ fontWeight: 700, color: 'var(--dash-ink)' }}>
+                      {deck.name}
+                      {deck.source_deck_id && (
+                        <span style={{ fontWeight: 600, color: 'var(--portal-slate)', fontSize: '11.5px' }}> · sent by you</span>
+                      )}
+                    </span>
+                    <span style={{ color: 'var(--dash-muted)', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                      {deck.mastered_count} / {deck.card_count} learned
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div style={sectionLabel}>Completed Contracts</div>
             <CompletedContractsList contracts={completedWithCounts} />
           </div>
@@ -302,7 +363,7 @@ export default async function CoachDashboard({
               />
             </Link>
 
-            <Tabs active={activeTab} />
+            <Tabs active={activeTab} tabs={COACH_TABS} />
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Link

@@ -121,3 +121,36 @@ create table if not exists submissions (
 
 create index if not exists idx_assignments_student on assignments(student_id);
 create index if not exists idx_submissions_student on submissions(student_id);
+
+-- Flashcards -----------------------------------------------------------------
+
+-- A deck belongs to a student, or -- when student_id is null -- to the coach's
+-- own library. Library decks are pushed to a student by *copying* them, so the
+-- student always owns (and can edit) what they study, and the coach later
+-- editing a template never rewrites work a student has already done.
+create table if not exists decks (
+  id text primary key,
+  student_id text references students(id) on delete cascade,
+  name text not null,
+  -- The library deck this one was copied from, so the coach can see who has
+  -- already been sent it. Nulled rather than cascaded: deleting a template
+  -- must never delete a student's copy.
+  source_deck_id text references decks(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+-- front = English, back = the student's own language. Leitner box 0 = new or
+-- lapsed, 5 = mastered; due_date is when the card next comes up for review.
+create table if not exists cards (
+  id text primary key,
+  deck_id text not null references decks(id) on delete cascade,
+  front text not null,
+  back text not null,
+  example text not null default '',
+  box integer not null default 0 check (box between 0 and 5),
+  due_date date not null default current_date,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_decks_student on decks(student_id);
+create index if not exists idx_cards_deck on cards(deck_id);

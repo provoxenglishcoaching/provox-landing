@@ -582,3 +582,228 @@ export async function completeContract(id: string): Promise<void> {
   const completedDate = toDateOnly(rows[0]?.last) ?? new Date().toISOString().slice(0, 10);
   await sql`update contracts set status = 'completed', completed_date = ${completedDate} where id = ${id}`;
 }
+
+// Flashcards -----------------------------------------------------------------
+
+export interface DeckRow {
+  id: string;
+  /** Null on a coach library deck; set on a student's own copy. */
+  student_id: string | null;
+  name: string;
+  source_deck_id: string | null;
+  created_at: string;
+}
+
+export interface CardRow {
+  id: string;
+  deck_id: string;
+  front: string;
+  back: string;
+  example: string;
+  box: number;
+  due_date: string;
+  created_at: string;
+}
+
+/** A deck plus the counts the list view shows, without loading its cards. */
+export interface DeckSummary extends DeckRow {
+  card_count: number;
+  due_count: number;
+  mastered_count: number;
+}
+
+function normalizeDeck<T extends DeckRow>(row: T): T {
+  const createdAt = row.created_at as unknown;
+  return { ...row, created_at: createdAt instanceof Date ? createdAt.toISOString() : String(createdAt) };
+}
+
+function normalizeCard(row: CardRow): CardRow {
+  const createdAt = row.created_at as unknown;
+  return {
+    ...row,
+    due_date: toDateOnly(row.due_date)!,
+    created_at: createdAt instanceof Date ? createdAt.toISOString() : String(createdAt),
+  };
+}
+
+/**
+ * Decks for the list view, with the card counts rolled up in the same query --
+ * one round trip regardless of how many decks a student has.
+ */
+export async function getDecksForStudent(studentId: string): Promise<DeckSummary[]> {
+  const rows = await sql`
+    select d.*,
+           count(c.id)::int as card_count,
+           count(c.id) filter (where c.due_date <= current_date)::int as due_count,
+           count(c.id) filter (where c.box >= 5)::int as mastered_count
+      from decks d
+      left join cards c on c.deck_id = d.id
+     where d.student_id = ${studentId}
+     group by d.id
+     order by d.created_at
+  ` as DeckSummary[];
+  return rows.map(normalizeDeck);
+}
+
+/** The coach's own library decks -- the ones with no owning student. */
+export async function getLibraryDecks(): Promise<DeckSummary[]> {
+  const rows = await sql`
+    select d.*,
+           count(c.id)::int as card_count,
+           0::int as due_count,
+           0::int as mastered_count
+      from decks d
+      left join cards c on c.deck_id = d.id
+     where d.student_id is null
+     group by d.id
+     order by d.created_at
+  ` as DeckSummary[];
+  return rows.map(normalizeDeck);
+}
+
+export async function getDeckById(id: string): Promise<DeckRow | undefined> {
+  const rows = await sql`select * from decks where id = ${id}` as DeckRow[];
+  return rows[0] ? normalizeDeck(rows[0]) : undefined;
+}
+
+export async function getCardsForDeck(deckId: string): Promise<CardRow[]> {
+  const rows = await sql`
+    select * from cards where deck_id = ${deckId} order by created_at
+  ` as CardRow[];
+  return rows.map(normalizeCard);
+}
+
+/**
+ * The student a card belongs to, resolved through its deck. Server actions use
+ * this to prove ownership before touching a card, so knowing (or guessing) a
+ * card id is never enough to reach another student's deck.
+ */
+export async function getCardOwner(cardId: string): Promise<{ student_id: string | null } | undefined> {
+  const rows = await sql`
+    select d.student_id
+      from cards c join decks d on d.id = c.deck_id
+     where c.id = ${cardId}
+  ` as { student_id: string | null }[];
+  return rows[0];
+}
+
+export async function createDeck(input: {
+  studentId: string | null;
+  name: string;
+  sourceDeckId?: string | null;
+}): Promise<DeckRow> {
+  const id = newId('deck');
+  const rows = await sql`
+    insert into decks (id, student_id, name, source_deck_id)
+    values (${id}, ${input.studentId}, ${input.name}, ${input.sourceDeckId ?? null})
+    returning *
+  ` as DeckRow[];
+  return normalizeDeck(rows[0]);
+}
+
+export async function renameDeck(id: string, name: string): Promise<void> {
+  await sql`update decks set name = ${name} where id = ${id}`;
+}
+
+export async function deleteDeck(id: string): Promise<void> {
+  await sql`delete from decks where id = ${id}`;
+}
+
+export async function createCard(input: {
+  deckId: string;
+  front: string;
+  back: string;
+  example: string;
+}): Promise<void> {
+  await sql`
+    insert into cards (id, deck_id, front, back, example)
+    values (${newId('card')}, ${input.deckId}, ${input.front}, ${input.back}, ${input.example})
+  `;
+}
+
+/**
+ * Inserts a whole pasted batch in one statement. Unnesting parallel arrays
+ * keeps a 500-card paste to a single round trip; looping over createCard
+ * would be 500 of them.
+ */
+export async function createCards(deckId: string, cards: { front: string; back: string }[]): Promise<void> {
+  if (cards.length === 0) return;
+  const ids = cards.map(() => newId('card'));
+  const fronts = cards.map((c) => c.front);
+  const backs = cards.map((c) => c.back);
+  await sql`
+    insert into cards (id, deck_id, front, back)
+    select u.id, ${deckId}, u.front, u.back
+      from unnest(${ids}::text[], ${fronts}::text[], ${backs}::text[]) as u(id, front, back)
+  `;
+}
+
+export async function updateCard(id: string, front: string, back: string, example: string): Promise<void> {
+  await sql`update cards set front = ${front}, back = ${back}, example = ${example} where id = ${id}`;
+}
+
+export async function deleteCard(id: string): Promise<void> {
+  await sql`delete from cards where id = ${id}`;
+}
+
+/**
+ * Writes back a finished study session in one statement. Reviewing 40 cards
+ * costs one round trip, not 40 -- the portal runs against a database that
+ * suspends when idle, so per-card writes would be the expensive way to build
+ * exactly the same feature.
+ *
+ * The deck_id guard means a tampered card id from another deck matches
+ * nothing rather than updating a card the student doesn't own.
+ */
+export async function applyReviewResults(
+  deckId: string,
+  results: { id: string; box: number; dueDate: string }[]
+): Promise<void> {
+  if (results.length === 0) return;
+  const ids = results.map((r) => r.id);
+  const boxes = results.map((r) => r.box);
+  const dues = results.map((r) => r.dueDate);
+  await sql`
+    update cards c
+       set box = v.box, due_date = v.due_date
+      from unnest(${ids}::text[], ${boxes}::int[], ${dues}::date[]) as v(id, box, due_date)
+     where c.id = v.id and c.deck_id = ${deckId}
+  `;
+}
+
+/**
+ * Copies a library deck to a student. The copy is an ordinary student-owned
+ * deck at fresh box/due values, so the student starts the material from
+ * scratch, with source_deck_id recording where it came from.
+ */
+export async function copyDeckToStudent(sourceDeckId: string, studentId: string, name: string): Promise<void> {
+  const deck = await createDeck({ studentId, name, sourceDeckId });
+  await sql`
+    insert into cards (id, deck_id, front, back, example)
+    select 'card_' || replace(gen_random_uuid()::text, '-', ''), ${deck.id}, front, back, example
+      from cards where deck_id = ${sourceDeckId}
+  `;
+}
+
+/** Student ids already holding a copy of this library deck. */
+export async function getDeckRecipients(sourceDeckId: string): Promise<string[]> {
+  const rows = await sql`
+    select distinct student_id from decks
+     where source_deck_id = ${sourceDeckId} and student_id is not null
+  ` as { student_id: string }[];
+  return rows.map((r) => r.student_id);
+}
+
+/** Deck and card counts per student, for the coach's student panel. */
+export async function getDeckCountsByStudent(): Promise<Record<string, { decks: number; cards: number }>> {
+  const rows = await sql`
+    select d.student_id,
+           count(distinct d.id)::int as decks,
+           count(c.id)::int as cards
+      from decks d
+      left join cards c on c.deck_id = d.id
+     where d.student_id is not null
+     group by d.student_id
+  ` as { student_id: string; decks: number; cards: number }[];
+  return Object.fromEntries(rows.map((r) => [r.student_id, { decks: r.decks, cards: r.cards }]));
+}

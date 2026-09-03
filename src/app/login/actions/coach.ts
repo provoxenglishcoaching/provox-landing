@@ -32,12 +32,22 @@ import {
   insertMakeupSession,
   deleteMakeupSessionsFor,
   newId,
+  getDeckById,
+  createDeck,
+  renameDeck,
+  deleteDeck,
+  createCards,
+  deleteCard,
+  getCardOwner,
+  copyDeckToStudent,
   type AssignmentType,
   type SessionStatus,
 } from '../lib/db';
 import { genCode, genPassword, hashPassword, verifyPassword } from '../lib/auth';
 import { generateInitialSessions, generateSessionsFrom, addDays, type ScheduleSlot } from '../lib/schedule';
 import { formatVnd } from '../lib/income';
+import { parseBulkCards } from '../lib/flashcards';
+import type { BulkAddState } from './student';
 import { isValidAvatar } from '../lib/avatars';
 import { requireCoach } from '../lib/session';
 import { validateFile, sanitizeFilename } from '../lib/upload';
@@ -390,6 +400,110 @@ export async function togglePayment(contractId: string, currentlyReceived: boole
 export async function finishContract(contractId: string): Promise<void> {
   await requireCoach();
   await completeContract(contractId);
+  revalidatePath('/login/coach');
+  revalidatePath('/login/student');
+}
+
+/*
+ * Flashcard library. The coach keeps master decks that belong to no student
+ * (decks.student_id is null) and pushes them out by copying: the student ends
+ * up owning an ordinary deck they can edit, and editing the master afterwards
+ * never rewrites work a student has already done.
+ */
+
+export interface LibraryDeckState {
+  error: string;
+  success: boolean;
+}
+
+export async function createLibraryDeck(
+  _prevState: LibraryDeckState,
+  formData: FormData
+): Promise<LibraryDeckState> {
+  await requireCoach();
+
+  const name = String(formData.get('name') ?? '').trim();
+  if (!name) return { error: 'Give the deck a name.', success: false };
+  if (name.length > 60) return { error: 'Deck names are limited to 60 characters.', success: false };
+
+  await createDeck({ studentId: null, name });
+  revalidatePath('/login/coach');
+  return { error: '', success: true };
+}
+
+/** Guard: a deck id the coach may act on is one with no owning student. */
+async function libraryDeck(deckId: string) {
+  const deck = await getDeckById(deckId);
+  return deck && deck.student_id === null ? deck : undefined;
+}
+
+export async function renameLibraryDeck(deckId: string, name: string): Promise<void> {
+  await requireCoach();
+  if (!(await libraryDeck(deckId))) return;
+
+  const trimmed = name.trim();
+  if (!trimmed || trimmed.length > 60) return;
+
+  await renameDeck(deckId, trimmed);
+  revalidatePath('/login/coach');
+}
+
+export async function deleteLibraryDeck(deckId: string): Promise<void> {
+  await requireCoach();
+  if (!(await libraryDeck(deckId))) return;
+
+  // Only the master goes. Copies already sent to students have their
+  // source_deck_id nulled by the schema and are otherwise untouched.
+  await deleteDeck(deckId);
+  revalidatePath('/login/coach');
+}
+
+export async function addLibraryCards(
+  deckId: string,
+  _prevState: BulkAddState,
+  formData: FormData
+): Promise<BulkAddState> {
+  await requireCoach();
+  if (!(await libraryDeck(deckId))) return { error: 'Deck not found.', added: 0, skippedLines: [] };
+
+  const { cards, skipped } = parseBulkCards(String(formData.get('bulk') ?? ''));
+  if (cards.length === 0) {
+    return {
+      error: 'No cards found. Put one card per line, as: english, translation',
+      added: 0,
+      skippedLines: skipped,
+    };
+  }
+
+  await createCards(deckId, cards);
+  revalidatePath('/login/coach');
+  return { error: '', added: cards.length, skippedLines: skipped };
+}
+
+export async function removeLibraryCard(cardId: string): Promise<void> {
+  await requireCoach();
+
+  // Cards are only removable from library decks here; a student's own copy is
+  // theirs to manage.
+  const owner = await getCardOwner(cardId);
+  if (!owner || owner.student_id !== null) return;
+
+  await deleteCard(cardId);
+  revalidatePath('/login/coach');
+}
+
+/**
+ * Sends a copy of a library deck to one student. Pushing the same deck twice
+ * is allowed -- it makes a second, independent copy -- so the UI shows who
+ * already has it rather than blocking the action outright.
+ */
+export async function pushDeckToStudent(deckId: string, studentId: string): Promise<void> {
+  await requireCoach();
+
+  const deck = await libraryDeck(deckId);
+  if (!deck) return;
+
+  await copyDeckToStudent(deckId, studentId, deck.name);
   revalidatePath('/login/coach');
   revalidatePath('/login/student');
 }

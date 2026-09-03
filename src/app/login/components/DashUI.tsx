@@ -109,12 +109,14 @@ export function EmptyNote({ children }: { children: ReactNode }) {
   );
 }
 
-export function Tabs({ active }: { active: 'overview' | 'students' }) {
-  const tabs: { key: 'overview' | 'students'; label: string; href: string }[] = [
-    { key: 'overview', label: 'Overview', href: '/login/coach' },
-    { key: 'students', label: 'Students', href: '/login/coach?tab=students' },
-  ];
+export interface TabItem {
+  key: string;
+  label: string;
+  href: string;
+}
 
+/** The coach's Overview/Students switch, and the student's Profile/Learn one. */
+export function Tabs({ active, tabs }: { active: string; tabs: TabItem[] }) {
   return (
     <nav className="dash-tabs">
       {tabs.map((t) => (
@@ -125,3 +127,13 @@ export function Tabs({ active }: { active: 'overview' | 'students' }) {
     </nav>
   );
 }
+
+export const COACH_TABS: TabItem[] = [
+  { key: 'overview', label: 'Overview', href: '/login/coach' },
+  { key: 'students', label: 'Students', href: '/login/coach?tab=students' },
+];
+
+export const STUDENT_TABS: TabItem[] = [
+  { key: 'profile', label: 'Profile', href: '/login/student' },
+  { key: 'learn', label: 'Learn', href: '/login/student?tab=learn' },
+];
