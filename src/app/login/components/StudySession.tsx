@@ -224,7 +224,14 @@ export default function StudySession({
             }
           }}
         >
-          <div className={`fc-card-inner${flipped ? ' is-flipped' : ''}`}>
+          {/* Keyed by card id: moving to a new card must unmount and remount
+              this element fresh, unflipped, with no transition playing --
+              otherwise this SAME node's own 600ms flip-back animation (from
+              the previous card) plays out with the new card's answer already
+              swapped onto its back face, showing through right as the exit
+              overlay above finishes fading. A flip the student triggers on
+              the current card (key unchanged) still animates normally. */}
+          <div key={current.id} className={`fc-card-inner${flipped ? ' is-flipped' : ''}`}>
             <div className="fc-face fc-face-front">
               <div className="fc-word">{questionText}</div>
               <div className="fc-hint">Click to flip{current.example ? ' & see example' : ''}</div>
