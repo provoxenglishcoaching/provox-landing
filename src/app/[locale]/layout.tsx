@@ -34,7 +34,10 @@ export async function generateMetadata({
     en: 'ProVox — Professional English Coaching',
   };
   const description = 'A premium coaching program for adults who want to speak English with confidence.';
-  const ogImage = 'https://www.provoxcoach.com/og-image.png';
+  // Link scrapers (Zalo, Facebook, Telegram) cache by full URL and mostly
+  // offer no way to purge. Bumping this version when the artwork changes is
+  // what actually makes the new preview appear.
+  const ogImage = 'https://www.provoxcoach.com/og-image.png?v=2';
 
   return {
     metadataBase: new URL('https://www.provoxcoach.com'),
@@ -45,7 +48,7 @@ export async function generateMetadata({
       description,
       url: 'https://www.provoxcoach.com',
       siteName: 'ProVox English Coaching',
-      images: [{ url: ogImage, width: 1536, height: 768, alt: 'ProVox — Professional English Coaching' }],
+      images: [{ url: ogImage, width: 1920, height: 1080, alt: 'ProVox — English Coaching' }],
       type: 'website',
     },
     twitter: {
@@ -72,10 +75,10 @@ export default async function LocaleLayout({
     <html lang={locale} className={`${montserrat.variable} ${nunitoSans.variable}`}>
       <head>
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta property="og:image" content="https://www.provoxcoach.com/og-image.png" />
-        <meta property="og:image:width" content="1536" />
-        <meta property="og:image:height" content="768" />
-        <meta name="twitter:image" content="https://www.provoxcoach.com/og-image.png" />
+        <meta property="og:image" content="https://www.provoxcoach.com/og-image.png?v=2" />
+        <meta property="og:image:width" content="1920" />
+        <meta property="og:image:height" content="1080" />
+        <meta name="twitter:image" content="https://www.provoxcoach.com/og-image.png?v=2" />
       </head>
       <body style={{ WebkitFontSmoothing: 'antialiased' } as React.CSSProperties}>
         <NextIntlClientProvider messages={messages}>
