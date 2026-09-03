@@ -67,6 +67,31 @@ holds all of it, deliberately free of DB and React imports:
 - Class length lives on the **contract**, not the student, so past contracts
   keep the duration they were actually taught at.
 
+## Flashcards
+
+Decks and cards live in `decks` / `cards`; the scheduling rules and the
+paste parser are in `lib/flashcards.ts`, kept free of DB and React imports
+the way `income.ts` is.
+
+- A deck with `student_id = null` is one of **your** library decks. Sending
+  one to a student **copies** it rather than sharing it, so the student owns
+  their copy and can edit it, and editing a master afterwards never rewrites
+  work they have already done. `source_deck_id` records where a copy came
+  from and is nulled (not cascaded) if you delete the master.
+- Reviews are graded in the browser and written back **once**, as a batch, by
+  `applyReviewResults`. The portal runs against a Neon instance that suspends
+  when idle, so a server action per card flip would be forty round trips for
+  the same forty-card session. Leaving part-way through still saves the cards
+  already graded.
+- The new box is computed on the **server** in `saveReview`. The browser only
+  reports which card was right or wrong.
+- Leitner intervals are 0, 1, 3, 7, 16, 35 days for boxes 0-5. Box 0 is due
+  the same day, so a missed card comes back in the same sitting.
+- Storage is a non-issue: a card is ~320 bytes with indexes, so 15 students
+  with 500 cards each is about 2.5MB. Adding audio or images to cards would
+  change that -- those would go to Vercel Blob and are the thing to price
+  before building.
+
 ## Uploads
 
 Files travel through server actions, which Vercel caps at 4.5MB of request
