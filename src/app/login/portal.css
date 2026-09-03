@@ -174,7 +174,8 @@ body:has(.dash-body) {
   .portal-wave-anim {
     animation: none !important;
   }
-  .fc-card-inner {
+  .fc-card-inner,
+  .fc-exit-overlay {
     transition: none !important;
   }
 }
@@ -280,6 +281,33 @@ body:has(.dash-body) {
   transform: rotateY(180deg);
   background: linear-gradient(135deg, var(--portal-navy-700) 0%, var(--portal-navy) 100%);
   box-shadow: var(--portal-shadow-lg), inset 0 0 0 1px rgba(42, 191, 191, 0.45);
+}
+
+/* The just-graded card, frozen on its own element and dropped away to reveal
+   the next question already sitting underneath. Its content is a fixed
+   snapshot (see StudySession's `exiting` state) so nothing it shows ever
+   changes while it's animating. */
+.fc-exit-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  background: linear-gradient(135deg, var(--portal-navy-700) 0%, var(--portal-navy) 100%);
+  box-shadow: var(--portal-shadow-lg), inset 0 0 0 1px rgba(42, 191, 191, 0.45);
+  pointer-events: none;
+  transform: translateY(0) rotate(0deg) scale(1);
+  opacity: 1;
+  transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.36s ease;
+}
+.fc-exit-overlay.fc-exit-leaving {
+  transform: translateY(90px) rotate(-8deg) scale(0.92);
+  opacity: 0;
 }
 
 .fc-word {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CardRow } from '../lib/db';
 import { shuffle } from '../lib/flashcards';
 import { saveReview } from '../actions/student';
@@ -25,6 +25,14 @@ interface ReviewEntry {
   box: number;
 }
 
+/** A frozen snapshot of the card just graded, animating off the top of the stack. */
+interface ExitingCard {
+  key: number;
+  word: string;
+  example: string;
+  leaving: boolean;
+}
+
 function prefersReducedMotion(): boolean {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
@@ -47,10 +55,36 @@ export default function StudySession({
   const [results, setResults] = useState<ReviewEntry[]>([]);
   const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
-  // Set the instant a grade button is pressed, cleared once the card has
-  // finished rotating back to front. While this is set, the displayed card
-  // is deliberately left alone -- see the note on handleFlipBack below.
-  const [pendingAdvance, setPendingAdvance] = useState<{ results: ReviewEntry[]; isLast: boolean } | null>(null);
+
+  // The card just graded keeps showing its own answer as it drops away, on
+  // its own element -- the card underneath has already silently moved on to
+  // the next question, so there's nothing for the departing one to leak.
+  const [exiting, setExiting] = useState<ExitingCard | null>(null);
+  const exitKey = useRef(0);
+
+  // A pending "session complete" swap waits for the last card's exit
+  // animation to finish, so it doesn't get cut short by the summary screen
+  // replacing the whole component mid-drop.
+  const pendingFinish = useRef<ReviewEntry[] | null>(null);
+
+  // Starts each new exiting card resting in place, then flips it to its
+  // "leaving" (dropped, faded) state a couple of frames later so the browser
+  // actually paints the resting position first and the transition has
+  // something to animate from.
+  useEffect(() => {
+    if (!exiting || exiting.leaving) return;
+    let raf2 = 0;
+    const key = exiting.key;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        setExiting((prev) => (prev && prev.key === key ? { ...prev, leaving: true } : prev));
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [exiting]);
 
   if (cards.length === 0) {
     return <EmptyNote>Add some cards to this deck before studying.</EmptyNote>;
@@ -65,44 +99,46 @@ export default function StudySession({
     }
   }
 
+  async function finish(finalResults: ReviewEntry[]) {
+    setDone(true);
+    setSaving(true);
+    await saveReview(deckId, finalResults);
+    setSaving(false);
+  }
+
   function grade(correct: boolean) {
     const current = order[index];
     const entry: ReviewEntry = { id: current.id, correct, box: current.box };
     const nextResults = [...results, entry];
     setResults(nextResults);
-
-    // Flip the *current* card back to front -- its content doesn't change,
-    // so whatever the student sees mid-rotation is still the card they just
-    // answered, not a peek at the next one. The card only advances once
-    // handleFlipBack fires, by which point the rotation has settled and
-    // there's nothing moving on screen when the new word appears.
     setFlipped(false);
 
     const isLast = index + 1 >= order.length;
-    if (prefersReducedMotion()) {
-      // No transition plays, so transitionend never fires -- advance now
-      // instead of leaving the session stuck on this card.
-      advance(nextResults, isLast);
-    } else {
-      setPendingAdvance({ results: nextResults, isLast });
-    }
-  }
 
-  async function advance(finalResults: ReviewEntry[], isLast: boolean) {
-    setPendingAdvance(null);
+    if (prefersReducedMotion()) {
+      if (isLast) finish(nextResults);
+      else setIndex((i) => i + 1);
+      return;
+    }
+
+    exitKey.current += 1;
+    setExiting({ key: exitKey.current, word: answerText, example: current.example, leaving: false });
+
     if (isLast) {
-      setDone(true);
-      setSaving(true);
-      await saveReview(deckId, finalResults);
-      setSaving(false);
+      pendingFinish.current = nextResults;
     } else {
       setIndex((i) => i + 1);
     }
   }
 
-  function handleFlipBack(e: React.TransitionEvent<HTMLDivElement>) {
-    if (e.propertyName !== 'transform' || !pendingAdvance) return;
-    advance(pendingAdvance.results, pendingAdvance.isLast);
+  function handleExitTransitionEnd(e: React.TransitionEvent<HTMLDivElement>) {
+    if (e.propertyName !== 'opacity') return;
+    setExiting(null);
+    if (pendingFinish.current) {
+      const finalResults = pendingFinish.current;
+      pendingFinish.current = null;
+      finish(finalResults);
+    }
   }
 
   if (done) {
@@ -180,18 +216,15 @@ export default function StudySession({
           className="fc-card"
           role="button"
           tabIndex={0}
-          onClick={() => {
-            if (pendingAdvance) return; // Card is mid flip-back; don't re-flip onto the outgoing card.
-            setFlipped((f) => !f);
-          }}
+          onClick={() => setFlipped((f) => !f)}
           onKeyDown={(e) => {
-            if ((e.key === 'Enter' || e.key === ' ') && !pendingAdvance) {
+            if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               setFlipped((f) => !f);
             }
           }}
         >
-          <div className={`fc-card-inner${flipped ? ' is-flipped' : ''}`} onTransitionEnd={handleFlipBack}>
+          <div className={`fc-card-inner${flipped ? ' is-flipped' : ''}`}>
             <div className="fc-face fc-face-front">
               <div className="fc-word">{questionText}</div>
               <div className="fc-hint">Click to flip{current.example ? ' & see example' : ''}</div>
@@ -202,6 +235,17 @@ export default function StudySession({
             </div>
           </div>
         </div>
+
+        {exiting && (
+          <div
+            key={exiting.key}
+            className={`fc-exit-overlay${exiting.leaving ? ' fc-exit-leaving' : ''}`}
+            onTransitionEnd={handleExitTransitionEnd}
+          >
+            <div className="fc-word">{exiting.word}</div>
+            {exiting.example && <div className="fc-example">{exiting.example}</div>}
+          </div>
+        )}
       </div>
 
       <div className="fc-grade-row">
