@@ -174,6 +174,9 @@ body:has(.dash-body) {
   .portal-wave-anim {
     animation: none !important;
   }
+  .fc-card-inner {
+    transition: none !important;
+  }
 }
 
 @media (max-width: 900px) {
@@ -182,5 +185,173 @@ body:has(.dash-body) {
      viewport instead of scrolling within its own card. */
   .portal-coach-grid {
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ---- Flashcard study card ---------------------------------------------- */
+
+.fc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.fc-progress {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dash-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Reuses the .dash-tabs / .dash-tab pill from the coach dashboard so the
+   direction switch reads as the same control language, just smaller. */
+.fc-direction .dash-tab {
+  padding: 7px 14px;
+  font-size: 12px;
+}
+
+.fc-stage {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 1.85;
+  margin: 0 auto;
+}
+
+.fc-stack {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--portal-navy) 0%, var(--portal-navy-700) 100%);
+  pointer-events: none;
+}
+.fc-stack-1 {
+  transform: translateY(10px) scale(0.96) rotate(-2deg);
+  opacity: 0.5;
+}
+.fc-stack-2 {
+  transform: translateY(20px) scale(0.92) rotate(3deg);
+  opacity: 0.28;
+}
+
+.fc-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  perspective: 1400px;
+  cursor: pointer;
+}
+
+.fc-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+.fc-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.fc-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  box-shadow: var(--portal-shadow-lg);
+}
+
+.fc-face-front {
+  background: linear-gradient(135deg, var(--portal-navy) 0%, var(--portal-navy-700) 100%);
+  box-shadow: var(--portal-shadow-lg), inset 0 0 0 1px rgba(42, 191, 191, 0.25);
+}
+
+.fc-face-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, var(--portal-navy-700) 0%, var(--portal-navy) 100%);
+  box-shadow: var(--portal-shadow-lg), inset 0 0 0 1px rgba(42, 191, 191, 0.45);
+}
+
+.fc-word {
+  color: #fff;
+  font-family: var(--next-montserrat), sans-serif;
+  font-weight: 700;
+  font-size: clamp(22px, 4vw, 34px);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.fc-hint {
+  margin-top: 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--portal-turq);
+}
+
+.fc-example {
+  margin-top: 14px;
+  font-size: 13.5px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.78);
+  max-width: 85%;
+}
+
+.fc-grade-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 22px;
+  min-height: 46px;
+}
+
+.fc-grade-btn {
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.fc-grade-btn:hover {
+  transform: translateY(-1px);
+}
+.fc-grade-bad {
+  background: var(--dash-bad-bg);
+  color: var(--dash-bad-ink);
+}
+.fc-grade-good {
+  background: var(--dash-good-bg);
+  color: var(--dash-good-ink);
+}
+
+.fc-tap-note {
+  color: var(--dash-muted);
+  font-size: 13px;
+}
+
+.fc-summary {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+@media (max-width: 480px) {
+  .fc-stage {
+    aspect-ratio: 1.4;
+  }
+  .fc-word {
+    font-size: clamp(19px, 6vw, 26px);
   }
 }

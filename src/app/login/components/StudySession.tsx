@@ -1,18 +1,30 @@
 'use client';
 
-import { useState, useMemo, useTransition } from 'react';
-import { saveReview } from '../actions/student';
+import { useState } from 'react';
 import type { CardRow } from '../lib/db';
-import { shuffle, toDateOnly } from '../lib/flashcards';
+import { shuffle } from '../lib/flashcards';
+import { saveReview } from '../actions/student';
+import { EmptyNote } from './DashUI';
 
-type Answer = { id: string; correct: boolean; box: number };
+type Direction = 'en-first' | 'native-first';
 
-/**
- * The review loop. Every flip and grade happens here in the browser: the deck
- * arrives once from the server, and the results go back once at the end. The
- * obvious alternative -- a server action per card -- would turn a forty-card
- * session into forty round trips against a database that suspends when idle.
- */
+const DIRECTION_KEY = 'provox-flashcard-direction';
+
+function readStoredDirection(): Direction {
+  try {
+    const stored = localStorage.getItem(DIRECTION_KEY);
+    return stored === 'native-first' ? 'native-first' : 'en-first';
+  } catch {
+    return 'en-first'; // Storage can be unavailable (private browsing, locked-down browser); default rather than throw.
+  }
+}
+
+interface ReviewEntry {
+  id: string;
+  correct: boolean;
+  box: number;
+}
+
 export default function StudySession({
   deckId,
   deckName,
@@ -24,161 +36,154 @@ export default function StudySession({
   cards: CardRow[];
   onExit: () => void;
 }) {
-  // Cards due today, or the whole deck if nothing is due -- a student who
-  // wants extra practice shouldn't be told to come back tomorrow.
-  const queue = useMemo(() => {
-    const today = toDateOnly(new Date());
-    const due = cards.filter((c) => c.due_date <= today);
-    return shuffle(due.length > 0 ? due : cards);
-  }, [cards]);
-
+  const [direction, setDirection] = useState<Direction>(readStoredDirection);
+  const [order] = useState(() => shuffle(cards));
   const [index, setIndex] = useState(0);
-  const [revealed, setRevealed] = useState(false);
-  const [answers, setAnswers] = useState<Answer[]>([]);
-  const [saving, startSaving] = useTransition();
-  const [saved, setSaved] = useState(false);
+  const [flipped, setFlipped] = useState(false);
+  const [results, setResults] = useState<ReviewEntry[]>([]);
+  const [done, setDone] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const card = queue[index];
-  const finished = index >= queue.length;
+  if (cards.length === 0) {
+    return <EmptyNote>Add some cards to this deck before studying.</EmptyNote>;
+  }
 
-  function grade(correct: boolean) {
-    const next = [...answers, { id: card.id, correct, box: card.box }];
-    setAnswers(next);
-    setRevealed(false);
-    setIndex((i) => i + 1);
-
-    // Grading the last card ends the session, so the whole batch goes back
-    // here -- one write for the review, straight from the event that finished
-    // it rather than from an effect watching for the end.
-    if (next.length >= queue.length) {
-      setSaved(true);
-      startSaving(() => saveReview(deckId, next));
+  function setDirectionAndStore(next: Direction) {
+    setDirection(next);
+    try {
+      localStorage.setItem(DIRECTION_KEY, next);
+    } catch {
+      // Nothing to fall back to -- the preference just won't persist this session.
     }
   }
 
-  /**
-   * Leaving part-way through still banks the cards already graded -- a student
-   * who does fifteen of forty shouldn't lose the fifteen.
-   */
-  function stopAndSave() {
-    if (!saved && answers.length > 0) {
-      setSaved(true);
-      startSaving(() => saveReview(deckId, answers));
+  async function grade(correct: boolean) {
+    const current = order[index];
+    const entry: ReviewEntry = { id: current.id, correct, box: current.box };
+    const nextResults = [...results, entry];
+    setResults(nextResults);
+    setFlipped(false);
+
+    if (index + 1 >= order.length) {
+      setDone(true);
+      setSaving(true);
+      await saveReview(deckId, nextResults);
+      setSaving(false);
+    } else {
+      setIndex(index + 1);
     }
-    onExit();
   }
 
-  if (queue.length === 0) {
+  if (done) {
+    const correctCount = results.filter((r) => r.correct).length;
     return (
-      <Shell deckName={deckName} onExit={onExit}>
-        <p style={{ color: 'var(--dash-muted)', fontSize: '14px', textAlign: 'center', margin: '30px 0' }}>
-          This deck has no cards yet. Add a few and come back.
+      <div className="fc-summary">
+        <h3 style={{ margin: '0 0 8px', fontFamily: 'var(--next-montserrat), sans-serif', color: 'var(--dash-ink)' }}>
+          Session complete
+        </h3>
+        <p style={{ color: 'var(--dash-muted)', margin: '0 0 20px' }}>
+          {correctCount} of {results.length} correct{saving ? ' — saving…' : ''}
         </p>
-      </Shell>
-    );
-  }
-
-  if (finished) {
-    const right = answers.filter((a) => a.correct).length;
-    return (
-      <Shell deckName={deckName} onExit={onExit}>
-        <div style={{ textAlign: 'center', padding: '26px 0' }}>
-          <div style={{ fontFamily: 'var(--next-montserrat), sans-serif', fontSize: '30px', fontWeight: 700, color: 'var(--dash-ink)' }}>
-            {right} / {answers.length}
-          </div>
-          <p style={{ color: 'var(--dash-muted)', fontSize: '13.5px', margin: '8px 0 20px' }}>
-            {saving ? 'Saving your progress…' : 'Progress saved. Cards you missed will come back sooner.'}
-          </p>
-          <button type="button" onClick={onExit} style={primaryButton}>
-            Done
-          </button>
-        </div>
-      </Shell>
-    );
-  }
-
-  return (
-    <Shell deckName={deckName} onExit={stopAndSave}>
-      <div style={{ fontSize: '11.5px', color: 'var(--dash-muted)', textAlign: 'center', marginBottom: '10px' }}>
-        Card {index + 1} of {queue.length}
-      </div>
-
-      <button
-        type="button"
-        onClick={() => setRevealed(true)}
-        style={{
-          width: '100%',
-          minHeight: '190px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '10px',
-          padding: '26px 20px',
-          background: revealed ? 'var(--portal-navy)' : '#fff',
-          color: revealed ? '#fff' : 'var(--dash-ink)',
-          border: '1px solid var(--dash-line)',
-          borderRadius: '16px',
-          cursor: revealed ? 'default' : 'pointer',
-          textAlign: 'center',
-        }}
-      >
-        <span style={{ fontFamily: 'var(--next-montserrat), sans-serif', fontSize: '24px', fontWeight: 700, lineHeight: 1.3 }}>
-          {revealed ? card.back : card.front}
-        </span>
-        {revealed && card.example && (
-          <span style={{ fontSize: '13px', opacity: 0.75, lineHeight: 1.5, maxWidth: '38ch' }}>{card.example}</span>
-        )}
-        {!revealed && (
-          <span style={{ fontSize: '12px', color: 'var(--dash-muted)', fontWeight: 600 }}>Tap to reveal</span>
-        )}
-      </button>
-
-      {revealed && (
-        <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
-          <button type="button" onClick={() => grade(false)} style={{ ...gradeButton, background: '#fbe6e9', color: '#a83a51' }}>
-            Missed it
-          </button>
-          <button type="button" onClick={() => grade(true)} style={{ ...gradeButton, background: 'var(--dash-good-bg)', color: 'var(--dash-good-ink)' }}>
-            Got it
-          </button>
-        </div>
-      )}
-    </Shell>
-  );
-}
-
-function Shell({ deckName, onExit, children }: { deckName: string; onExit: () => void; children: React.ReactNode }) {
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '14px' }}>
-        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--dash-muted)' }}>Studying {deckName}</span>
-        <button type="button" onClick={onExit} style={{ background: 'none', border: 'none', color: 'var(--portal-slate)', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer' }}>
-          Stop
+        <button
+          type="button"
+          disabled={saving}
+          onClick={onExit}
+          style={{
+            background: 'var(--portal-navy)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '10px',
+            padding: '10px 22px',
+            fontWeight: 700,
+            fontSize: '13.5px',
+            cursor: saving ? 'default' : 'pointer',
+          }}
+        >
+          {saving ? 'Saving…' : 'Done'}
         </button>
       </div>
-      {children}
+    );
+  }
+
+  const current = order[index];
+  const questionText = direction === 'en-first' ? current.front : current.back;
+  const answerText = direction === 'en-first' ? current.back : current.front;
+
+  return (
+    <div className="fc-study">
+      <div className="fc-toolbar">
+        <button
+          type="button"
+          onClick={onExit}
+          style={{ background: 'none', border: 'none', color: 'var(--portal-slate)', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+        >
+          ← {deckName}
+        </button>
+        <div className="fc-progress">
+          {index + 1} / {order.length}
+        </div>
+        <nav className="dash-tabs fc-direction">
+          <button
+            type="button"
+            className="dash-tab"
+            data-active={direction === 'en-first'}
+            onClick={() => setDirectionAndStore('en-first')}
+          >
+            EN → VI
+          </button>
+          <button
+            type="button"
+            className="dash-tab"
+            data-active={direction === 'native-first'}
+            onClick={() => setDirectionAndStore('native-first')}
+          >
+            VI → EN
+          </button>
+        </nav>
+      </div>
+
+      <div className="fc-stage">
+        <div className="fc-stack fc-stack-2" />
+        <div className="fc-stack fc-stack-1" />
+        <div
+          className="fc-card"
+          role="button"
+          tabIndex={0}
+          onClick={() => setFlipped((f) => !f)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setFlipped((f) => !f);
+            }
+          }}
+        >
+          <div className={`fc-card-inner${flipped ? ' is-flipped' : ''}`}>
+            <div className="fc-face fc-face-front">
+              <div className="fc-word">{questionText}</div>
+              <div className="fc-hint">Click to flip{current.example ? ' & see example' : ''}</div>
+            </div>
+            <div className="fc-face fc-face-back">
+              <div className="fc-word">{answerText}</div>
+              {current.example && <div className="fc-example">{current.example}</div>}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="fc-grade-row">
+        {flipped ? (
+          <>
+            <button type="button" className="fc-grade-btn fc-grade-bad" onClick={() => grade(false)}>
+              Missed it
+            </button>
+            <button type="button" className="fc-grade-btn fc-grade-good" onClick={() => grade(true)}>
+              Got it
+            </button>
+          </>
+        ) : (
+          <span className="fc-tap-note">Tap the card to reveal the answer</span>
+        )}
+      </div>
     </div>
   );
 }
-
-const primaryButton: React.CSSProperties = {
-  background: 'var(--portal-navy)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '10px',
-  padding: '11px 24px',
-  fontWeight: 700,
-  fontSize: '13.5px',
-  cursor: 'pointer',
-};
-
-const gradeButton: React.CSSProperties = {
-  flex: 1,
-  border: 'none',
-  borderRadius: '11px',
-  padding: '13px 10px',
-  fontWeight: 700,
-  fontSize: '14px',
-  cursor: 'pointer',
-};
