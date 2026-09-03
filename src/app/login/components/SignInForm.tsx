@@ -49,10 +49,10 @@ export default function SignInForm() {
     >
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '22px' }}>
         <Image
-          src="/logo-light.svg"
-          alt="ProVox — Professional English Coaching"
-          width={420}
-          height={340}
+          src="/logo-vertical.png"
+          alt="ProVox — English Coaching"
+          width={1178}
+          height={951}
           priority
           style={{ width: '160px', height: 'auto' }}
         />

@@ -62,10 +62,10 @@ export default async function StudentDashboard() {
         <div className="dash-frame">
           <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '18px' }}>
             <Image
-              src="/logo-light.svg"
-              alt="ProVox — Professional English Coaching"
-              width={425}
-              height={345}
+              src="/logo-vertical.png"
+              alt="ProVox — English Coaching"
+              width={1178}
+              height={951}
               priority
               style={{ width: '104px', height: 'auto' }}
             />

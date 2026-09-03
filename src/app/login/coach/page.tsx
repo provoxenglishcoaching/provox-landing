@@ -293,10 +293,10 @@ export default async function CoachDashboard({
             <Link href="/login/coach" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
               {/* The same full lockup the student sign-in screen uses. */}
               <Image
-                src="/logo-light.svg"
-                alt="ProVox — Professional English Coaching"
-                width={425}
-                height={345}
+                src="/logo-vertical.png"
+                alt="ProVox — English Coaching"
+                width={1178}
+                height={951}
                 priority
                 style={{ width: '104px', height: 'auto' }}
               />

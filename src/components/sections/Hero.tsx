@@ -27,16 +27,13 @@ export default function Hero() {
             the column is the full viewport and centring would strand it.
           */}
           <div className="flex justify-start md:justify-center px-6 mb-10">
-            {/* The wide lockup, landing page only — the portal screens keep
-                the stacked one. Runs wider than the stacked logo did to hold
-                the same presence at a 3.18:1 aspect. */}
             <Image
-              src="/logo-horizontal.png"
-              alt="ProVox — Professional English Coaching"
-              width={1588}
-              height={499}
+              src="/logo-vertical.png"
+              alt="ProVox — English Coaching"
+              width={1178}
+              height={951}
               priority
-              className="w-64 md:w-[380px] lg:w-[420px] h-auto"
+              className="w-56 md:w-72 h-auto"
             />
           </div>
 
